@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Shader {
 	
-	public static final String shaderFilePath = "/Users/Landon/Documents/Eclipse/Game/Resources/Shaders/";
+	public static final String shaderFilePath = "Resources/Shaders/";
 	
 	private int program;
 	

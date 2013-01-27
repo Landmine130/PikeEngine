@@ -15,7 +15,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Model {
 	
-	private final String MODELDATA_PATH = "/Users/Landon/Documents/Eclipse/Game/Resources/Models/";
+	private final String MODELDATA_PATH = "Resources/Models/";
 	
 	private FloatBuffer data;
 

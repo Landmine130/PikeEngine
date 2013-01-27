@@ -285,6 +285,11 @@ public class World {
 		retVal.transpose();
 		return retVal;
 	}
+
+	public void setViewPoint(ViewPoint viewPoint) {
+
+		this.viewPoint = viewPoint;
+	}
 	
 }
 

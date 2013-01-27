@@ -51,9 +51,9 @@ public class ViewPoint extends WorldObject {
 		transformation.rotX(-orientation.x);
 		transformation.rotY(-orientation.y);
 		transformation.rotZ(-orientation.z);
-		Matrix4f translation = new Matrix4f(position);
-		translation.invert();
-		transformation.mul(translation);
+		Vector3f negativePosition = new Vector3f(position);
+		negativePosition.negate();
+		transformation.translate(negativePosition);
 		return transformation;
 	}
 }

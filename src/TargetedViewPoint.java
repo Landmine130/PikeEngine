@@ -9,8 +9,8 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 	
 	public TargetedViewPoint(WorldObject target, float distanceFromTarget) {
 		super();
+		this.distanceFromTarget = distanceFromTarget;
 		setTarget(target);
-		setDistanceFromTarget(distanceFromTarget);
 	}
 	
 	public void setTarget(WorldObject target) {
