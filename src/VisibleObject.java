@@ -1,6 +1,6 @@
 
 
-public class VisibleObject extends WorldObject {
+public class VisibleObject extends CollisionObject {
 
 	private Shader shader;
 	private Model model;
@@ -51,7 +51,7 @@ public class VisibleObject extends WorldObject {
 		this.opacity = opacity;
 	}
 	
-	public void prepareToUpdate() {
+	public void prepareToUpdate(double timeElapsed) {
 		
 	}
 	

@@ -38,10 +38,6 @@ public class ViewPoint extends WorldObject {
 		farViewDistance = distance;
 	}
 	
-	public void prepareToUpdate() {
-		
-	}
-	
 	public void update() {
 		//move(new Vector3f(-0.03f, -.000f, 0.0f));
 	}

@@ -51,6 +51,8 @@ public class World {
 	private boolean fullscreen;
 	
 	private Matrix4f projectionMatrix;
+
+	private double timeSinceLastUpdate;
 	
 	public World() {
 		
@@ -170,16 +172,17 @@ public class World {
 	
 	public void start() {
 
+		timeSinceLastUpdate = Timer.getTime();
 		while (isRunning) {
+			glViewport(0, 0, Display.getWidth(), Display.getHeight());
 			if (!isPaused) {
 				updateObjects();
 				notifyObservers();
+				timeSinceLastUpdate = Timer.getTime();
 			}
 			drawFrame();
 			Display.update();
 			Display.sync(TARGET_FPS);
-			glViewport(0, 0, Display.getWidth(), Display.getHeight());
-
 			InputHandler.checkInput();
 			if (Display.isCloseRequested()) {
 				isRunning = false;
@@ -190,9 +193,9 @@ public class World {
 	
 	private void updateObjects() {
 		for (VisibleObject o : objects) {
-			o.prepareToUpdate();
+			o.prepareToUpdate(Timer.getTime() - timeSinceLastUpdate);
 		}
-		viewPoint.prepareToUpdate();
+		viewPoint.prepareToUpdate(Timer.getTime() - timeSinceLastUpdate);
 		
 		for (VisibleObject o : objects) {
 			o.update();
@@ -233,7 +236,7 @@ public class World {
 			
 			modelViewProjectionBuffer = BufferUtils.createFloatBuffer(16);
 			normalBuffer = BufferUtils.createFloatBuffer(9);
-
+			
 			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
 			modelViewProjectionBuffer.flip();
 			glUniformMatrix4(o.getShader().getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
@@ -245,7 +248,7 @@ public class World {
 			glUniform1i(o.getShader().getTextureUniformLocation(), 0);
 			
 			glBindVertexArray(o.getModel().getVertexArray());
-			 
+			
 			glBindBuffer(GL_ARRAY_BUFFER, o.getModel().getBuffer());
 			
 			
@@ -263,7 +266,7 @@ public class World {
 	private void notifyObservers() {
 		
 		for (WorldUpdateObserver o : observers) {
-			o.worldUpdated(this);
+			o.worldUpdated(this, Timer.getTime() - timeSinceLastUpdate);
 		}
 	}
 	

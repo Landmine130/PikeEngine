@@ -77,12 +77,12 @@ class Timer implements Runnable {
 	}
 	
 	private final float frequency;
-	private final long duration;
+	private final double duration;
 	private Method method;
 	private Object target;
 	private Thread thread = new Thread(this);
-	private volatile long startTime;
-	private volatile long endTime;
+	private volatile double startTime;
+	private volatile double endTime;
 	private volatile boolean running;
 	
 	public void stop() {
@@ -93,7 +93,7 @@ class Timer implements Runnable {
 		return frequency;
 	}
 	
-	public long duration() {
+	public double duration() {
 		return duration;
 	}
 	
@@ -133,10 +133,10 @@ class Timer implements Runnable {
 	public void run() {
 		startTime = getTime();
 		endTime = startTime + duration;
-		long timePerLoop = Math.round(1000 / frequency);
-		long sleepTime;
-		long lastTime = startTime;
-		long currentTime;
+		double timePerLoop = Math.round(1000 / frequency);
+		double sleepTime;
+		double lastTime = startTime;
+		double currentTime;
 		boolean stillWaiting;
 		
 		while ((duration < 0 || percentComplete() < 100) && running) {
@@ -145,7 +145,7 @@ class Timer implements Runnable {
 				try {
 					sleepTime = timePerLoop - (currentTime - lastTime);
 					if (sleepTime > 0) {
-						Thread.sleep(sleepTime);
+						Thread.sleep((long)(sleepTime * 1000));
 					}
 					stillWaiting = false;
 				} catch (InterruptedException e) {
@@ -169,7 +169,7 @@ class Timer implements Runnable {
 				return -1;
 			}
 			else {
-				double percent = (getTime() - startTime) / (double)(endTime - startTime) * 100;
+				double percent = (getTime() - startTime) / (endTime - startTime) * 100;
 				if (percent > 100) {
 					return 100;
 				}
@@ -183,8 +183,8 @@ class Timer implements Runnable {
 		}
 	}
 	
-	private long getTime() {
-		return System.nanoTime() / 1000000;
+	public static double getTime() {
+		return System.nanoTime() / 1000000000.0;
 	}
 }
 

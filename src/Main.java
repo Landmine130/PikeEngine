@@ -14,13 +14,13 @@ public class Main implements InputObserver {
 		world.getViewPoint().setOrientation(new Vector3f(0,MathF.degreesToRadians(0),0));
 		o = new VisibleObject("banana");
 		o.setPosition(new Vector3f(0,0,-50));
-		//world.setViewPoint(new TargetedViewPoint(o, -50));
-		//p = new VisibleObject("claw");
-		//p.setPosition(new Vector3f(0,0,-50));
+		world.setViewPoint(new TargetedViewPoint(o, -50));
+		p = new VisibleObject("banana");
+		p.setPosition(new Vector3f(0,.5f,-50));
 		Main mainObject = new Main();
 		InputHandler.addObserver(mainObject);
 		world.addObject(o);
-		//world.addObject(p);
+		world.addObject(p);
 		world.start();
 	}
 	
@@ -33,7 +33,7 @@ public class Main implements InputObserver {
 			world.setPaused(!world.isPaused());
 		}
 		else {
-			///*
+			/*
 			if (key == Keyboard.KEY_1) {
 				world.getViewPoint().move(new Vector3f(-1,0,0));
 			}
@@ -71,7 +71,7 @@ public class Main implements InputObserver {
 			else if (key == Keyboard.KEY_6) {
 				o.move(new Vector3f(0,0,1));
 			}
-			/*
+			*/
 			if (key == Keyboard.KEY_1) {
 				world.getViewPoint().rotate(new Vector3f(MathF.degreesToRadians(-90),0,0));
 			}

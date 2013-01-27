@@ -16,7 +16,7 @@ public class WorldObject {
 		observers = new ArrayList<WorldObjectMovementObserver>();
 	}
 	
-	public void prepareToUpdate() {
+	public void prepareToUpdate(double timeElapsed) {
 		
 	}
 	
