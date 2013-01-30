@@ -38,6 +38,11 @@ public abstract class Tuple3i implements Serializable {
 
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7083848765542369568L;
+
+	/**
       * The x coordinate.
       */
     public int x;
@@ -391,5 +396,89 @@ public abstract class Tuple3i implements Serializable {
             y = -y;
         if (z < 0.0)
             z = -z;
+    }
+    
+    /**
+     * Sets this tuple to the result of dividing t1 and t2.
+     * @param t1 the dividend of the division
+     * @param t2 the divisor of the division
+     */
+    public final void div(Tuple3i t1, Tuple3i t2) {
+    	x = t1.x / t2.x;
+    	y = t1.y / t2.y;
+    	z = t1.z / t2.z;
+    }
+    /**
+     * Sets this tuple to the result of dividing each element of t1 and a scalar.
+     * @param t1 the dividend of the division
+     * @param scalar the divisor of the division
+     */
+    public final void div(Tuple3i t1, int scalar) {
+    	x = t1.x / scalar;
+    	y = t1.y / scalar;
+    	z = t1.z / scalar;
+    }
+    
+    /**
+     * Sets this tuple to the result of dividing this tuple and t1.
+     * @param t1 the divisor of the division
+     */
+    public final void div(Tuple3i t1) {
+    	div(this, t1);
+    }
+    
+    /**
+     * Sets this tuple to the result of dividing each element of this tuple and a scalar.
+     * @param scalar the divisor of the division
+     */
+    public final void div(int scalar) {
+    	div(this, scalar);
+    }
+    
+    /**
+     * Sets this tuple to the result of t1 modulo t2.
+     * @param t1 the dividend of the modulo
+     * @param t2 the divisor of the modulo
+     */
+    public final void mod(Tuple3i t1, Tuple3i t2) {
+    	x = t1.x % t2.x;
+    	y = t1.y % t2.y;
+    	z = t1.z % t2.z;
+    }
+    
+    /**
+     * Sets this tuple to the result of t1 modulo scalar.
+     * @param t1 the dividend of the modulo
+     * @param scalar the divisor of the modulo
+     */
+    public final void mod(Tuple3i t1, int scalar) {
+    	x = t1.x % scalar;
+    	y = t1.y % scalar;
+    	z = t1.z % scalar;
+    }
+    
+    /**
+     * Sets this tuple to the result of this tuple modulo t1.
+     * @param t1 the divisor of the modulo
+     */
+    public final void mod(Tuple3i t1) {
+    	mod(this, t1);
+    }
+    
+    /**
+     * Sets this tuple to the result of this tuple modulo scalar.
+     * @param scalar the divisor of the modulo
+     */
+    public final void mod(int scalar) {
+    	mod(this, scalar);
+    }
+    
+    /**
+     * Sets this tuple to the result of taking the absolute value of itself.
+     */
+    public final void abs() {
+    	x = Math.abs(x);
+    	y = Math.abs(y);
+    	z = Math.abs(z);
     }
 }
