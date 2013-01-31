@@ -1,5 +1,6 @@
 package world.terrain;
 
+import world.World;
 import world.WorldObject;
 import world.VisibleObject;
 import vecmath.Vector3f;
@@ -11,27 +12,28 @@ class TerrainGenerator {
 	
 	private long seed;
 	private ArrayList<TerrainFeature> terrainFeatures = new ArrayList<TerrainFeature>();
+	private World world;
 	
-	
-	public TerrainGenerator(long seed) {
+	public TerrainGenerator(long seed, World world) {
 		this.seed = seed;
+		this.world = world;
 	}
 	
 	public long getSeed() {
 		return seed;
 	}
 	
-	public Chunk generateChunk(Vector3i size) {
-		Chunk chunk = new Chunk(size);
+	public Chunk generateChunk(Vector3i size, Vector3i position) {
+		Chunk chunk = new Chunk(size, position);
 		
-		for (int i = 0; i < chunk.getPosition().x; i++) {
-			for (int j = 0; j < chunk.getPosition().z; j++) {
+		for (int i = 0; i < chunk.getSize().x; i++) {
+			for (int j = 0; j < chunk.getSize().z; j++) {
 				
 				WorldObject o = new VisibleObject("banana");
 				o.setPosition(new Vector3f(i, 0, j));
-				
-				Vector3i position = new Vector3i(i,0,j);
-				chunk.set(o, position);
+				world.addObject(o);
+				Vector3i blockPosition = new Vector3i(i,0,j);
+				chunk.set(o, blockPosition);
 			}
 		}
 		

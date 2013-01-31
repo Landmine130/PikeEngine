@@ -36,8 +36,9 @@ public class World {
 	private final int GL_MINOR_VERSION = 2;
 	
 	private ArrayList<WorldUpdateObserver> observers;
-	private ArrayList<VisibleObject> objects;
-	
+	private ArrayList<VisibleObject> visibleObjects;
+	private ArrayList<WorldObject> worldObjects;
+
 	private volatile boolean isRunning;
 	private volatile boolean isPaused;
 	
@@ -61,7 +62,8 @@ public class World {
 	public World() {
 		
 		observers = new ArrayList<WorldUpdateObserver>();
-		objects = new ArrayList<VisibleObject>();
+		visibleObjects = new ArrayList<VisibleObject>();
+		worldObjects = new ArrayList<WorldObject>();
 
 		viewPoint = new ViewPoint();
 		
@@ -69,7 +71,7 @@ public class World {
 		soundManager.initialize(8);
 		
 		fullscreen = false;
-		setPaused(false);
+		isPaused = false;
 		
 		try {
 			//setDisplayMode();
@@ -80,7 +82,6 @@ public class World {
 			ContextAttribs contextAtrributes = new ContextAttribs(GL_MAJOR_VERSION, GL_MINOR_VERSION).withProfileCore(true).withForwardCompatible(true);			 
 			Display.create(pixelFormat, contextAtrributes);
 			Display.setResizable(true);
-			Mouse.setGrabbed(true);
 			isRunning = true;
 			
 		} catch (LWJGLException le) {
@@ -112,12 +113,22 @@ public class World {
 		observers.remove(o);
 	}
 	
-	public void addObject(VisibleObject o) {
-		objects.add(o);
+	public void addObject(WorldObject o) {
+		if (o instanceof VisibleObject) {
+			visibleObjects.add((VisibleObject) o);
+		}
+		else {
+			worldObjects.add(o);
+		}
 	}
 	
-	public void removeObject(VisibleObject o) {
-		objects.remove(o);
+	public void removeObject(WorldObject o) {
+		if (o instanceof VisibleObject) {
+			visibleObjects.remove(o);
+		}
+		else {
+			worldObjects.remove(o);
+		}
 	}
 	
 	/**
@@ -175,7 +186,8 @@ public class World {
 	}
 	
 	public void start() {
-
+		setPaused(false);
+		
 		timeSinceLastUpdate = Timer.getTime();
 		while (isRunning) {
 			glViewport(0, 0, Display.getWidth(), Display.getHeight());
@@ -196,12 +208,18 @@ public class World {
 	}
 	
 	private void updateObjects() {
-		for (VisibleObject o : objects) {
+		for (VisibleObject o : visibleObjects) {
+			o.prepareToUpdate(Timer.getTime() - timeSinceLastUpdate);
+		}
+		for (WorldObject o : worldObjects) {
 			o.prepareToUpdate(Timer.getTime() - timeSinceLastUpdate);
 		}
 		viewPoint.prepareToUpdate(Timer.getTime() - timeSinceLastUpdate);
 		
-		for (VisibleObject o : objects) {
+		for (VisibleObject o : visibleObjects) {
+			o.update();
+		}
+		for (WorldObject o : worldObjects) {
 			o.update();
 		}
 		viewPoint.update();
@@ -223,7 +241,7 @@ public class World {
 		FloatBuffer modelViewProjectionBuffer;
 		FloatBuffer normalBuffer;
 		
-		for (VisibleObject o : objects) {
+		for (VisibleObject o : visibleObjects) {
 			modelMatrix = o.getTransformationMatrix();
 			modelViewMatrix = new Matrix4f();
 			modelViewMatrix.mul(viewMatrix, modelMatrix);

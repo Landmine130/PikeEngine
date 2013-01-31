@@ -44,6 +44,7 @@ public class ViewPoint extends WorldObject {
 	}
 	
 	public Matrix4f getTransformationMatrix() {
+		
 		Matrix4f transformation = new Matrix4f();
 		transformation.rotX(-orientation.x);
 		transformation.rotY(-orientation.y);

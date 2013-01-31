@@ -11,9 +11,10 @@ public class Chunk {
 	
 	private Vector3i size;
 	
-	public Chunk(Vector3i size) {
+	public Chunk(Vector3i size, Vector3i position) {
 		objects = new WorldObject[size.x][size.y][size.z];
 		this.size = size;
+		this.position = position;
 	}
 	
 	public WorldObject get(Vector3i position) {

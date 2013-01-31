@@ -3,6 +3,7 @@ package world.terrain;
 import java.util.HashMap;
 import java.util.MissingResourceException;
 import vecmath.Vector3i;
+import world.World;
 import world.WorldObject;
 
 public class Terrain {
@@ -10,12 +11,14 @@ public class Terrain {
 	private long seed;
 	private final int CHUNK_LOAD_DISTANCE = 20;
 	private HashMap<Vector3i, Chunk> loadedChunks = new HashMap<Vector3i, Chunk>(CHUNK_LOAD_DISTANCE * 6);
-	private final int CHUNK_SIZE = 16;
+	private final int CHUNK_SIZE = 3;
 	private TerrainGenerator generator;
+	private World world;
 	
-	public Terrain(long seed) {
+	public Terrain(long seed, World world) {
 		this.seed = seed;
-		generator = new TerrainGenerator(seed);
+		generator = new TerrainGenerator(seed, world);
+		this.world = world;
 	}
 	
 	public long getSeed() {
@@ -61,7 +64,7 @@ public class Terrain {
 	}
 	
 	public void load(Vector3i chunkPosition) {
-		loadedChunks.put(chunkPosition, generator.generateChunk(new Vector3i(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE)));
+		loadedChunks.put(chunkPosition, generator.generateChunk(new Vector3i(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE), chunkPosition));
 	}
 	
 	public void unload(Vector3i chunkPosition) {
