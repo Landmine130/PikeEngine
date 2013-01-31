@@ -21,11 +21,11 @@ public class Main implements InputObserver {
 		Terrain terrain = new Terrain(System.nanoTime(), world);
 		terrain.load(new Vector3i(0,0,0));
 		
-		world.getViewPoint().setPosition(new Vector3f(0,0,100));
+		world.getViewPoint().setPosition(new Vector3f(0,0,0));
 		world.getViewPoint().setOrientation(new Vector3f(0,MathF.degreesToRadians(0),0));
 		o = new VisibleObject("banana");
 		o.setPosition(new Vector3f(0,0,-.5f));
-		//world.setViewPoint(new TargetedViewPoint(o, -100));
+		world.setViewPoint(new TargetedViewPoint(o, -100));
 		//p = new VisibleObject("cube");
 		//p.setPosition(new Vector3f(.5f,10f,-50));
 		Main mainObject = new Main();

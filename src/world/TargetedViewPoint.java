@@ -61,15 +61,16 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 
 	private void updatePosition() {
 		
-		Matrix4f newLocation = new Matrix4f(target.getPosition());
+		Matrix4f newLocation = new Matrix4f(new Vector3f(0, 0, distanceFromTarget));
 		
-		newLocation.rotX(orientation.x);
-		newLocation.rotY(orientation.y);
-		newLocation.rotZ(orientation.z);
+		Vector3f myOrientation = getOrientation();
 		
-		newLocation.translate(new Vector3f(0, 0, -distanceFromTarget));
-
-		
+		newLocation.rotX(-myOrientation.x);
+		newLocation.rotY(-myOrientation.y);
+		newLocation.rotZ(-myOrientation.z);
+		newLocation.invert();
+		//newLocation.translate(new Vector3f(0, 0, -distanceFromTarget));
+		newLocation.mul(new Matrix4f(target.getPosition()));
 		super.setPosition(newLocation.translationVector());
 	}
 	

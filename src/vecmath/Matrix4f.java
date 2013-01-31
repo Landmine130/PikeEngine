@@ -1069,25 +1069,25 @@ public class Matrix4f implements Serializable {
 	// alias-safe way.
 	// less *,+,- calculation than expanded expression.
 	set(
-	    m11*(m22*m33 - m23*m32) + m12*(m23*m31 - m21*m33) + m13*(m21*m32 - m22*m31),
-	    m21*(m02*m33 - m03*m32) + m22*(m03*m31 - m01*m33) + m23*(m01*m32 - m02*m31),
-	    m31*(m02*m13 - m03*m12) + m32*(m03*m11 - m01*m13) + m33*(m01*m12 - m02*m11),
-	    m01*(m13*m22 - m12*m23) + m02*(m11*m23 - m13*m21) + m03*(m12*m21 - m11*m22),
+	    m11*(m22*m33 - m32*m23) + m21*(m32*m13 - m12*m33) + m31*(m12*m23 - m22*m13),
+	    m12*(m20*m33 - m30*m23) + m22*(m30*m13 - m10*m33) + m32*(m10*m23 - m20*m13),
+	    m13*(m20*m31 - m30*m21) + m23*(m30*m11 - m10*m31) + m33*(m10*m21 - m20*m11),
+	    m10*(m31*m22 - m21*m32) + m20*(m11*m32 - m31*m12) + m30*(m21*m12 - m11*m22),
 
-	    m12*(m20*m33 - m23*m30) + m13*(m22*m30 - m20*m32) + m10*(m23*m32 - m22*m33),
-	    m22*(m00*m33 - m03*m30) + m23*(m02*m30 - m00*m32) + m20*(m03*m32 - m02*m33),
-	    m32*(m00*m13 - m03*m10) + m33*(m02*m10 - m00*m12) + m30*(m03*m12 - m02*m13),
-	    m02*(m13*m20 - m10*m23) + m03*(m10*m22 - m12*m20) + m00*(m12*m23 - m13*m22),
+	    m21*(m02*m33 - m32*m03) + m31*(m22*m03 - m02*m23) + m01*(m32*m23 - m22*m33),
+	    m22*(m00*m33 - m30*m03) + m32*(m20*m03 - m00*m23) + m02*(m30*m23 - m20*m33),
+	    m23*(m00*m31 - m30*m01) + m33*(m20*m01 - m00*m21) + m03*(m30*m21 - m20*m31),
+	    m20*(m31*m02 - m01*m32) + m30*(m01*m22 - m21*m02) + m00*(m21*m32 - m31*m22),
 
-	    m13*(m20*m31 - m21*m30) + m10*(m21*m33 - m23*m31) + m11*(m23*m30 - m20*m33),
-	    m23*(m00*m31 - m01*m30) + m20*(m01*m33 - m03*m31) + m21*(m03*m30 - m00*m33),
-	    m33*(m00*m11 - m01*m10) + m30*(m01*m13 - m03*m11) + m31*(m03*m10 - m00*m13),
-	    m03*(m11*m20 - m10*m21) + m00*(m13*m21 - m11*m23) + m01*(m10*m23 - m13*m20),
+	    m31*(m02*m13 - m12*m03) + m01*(m12*m33 - m32*m13) + m11*(m32*m03 - m02*m33),
+	    m32*(m00*m13 - m10*m03) + m02*(m10*m33 - m30*m13) + m12*(m30*m03 - m00*m33),
+	    m33*(m00*m11 - m10*m01) + m03*(m10*m31 - m30*m11) + m13*(m30*m01 - m00*m31),
+	    m30*(m11*m02 - m01*m12) + m00*(m31*m12 - m11*m32) + m10*(m01*m32 - m31*m02),
 
-	    m10*(m22*m31 - m21*m32) + m11*(m20*m32 - m22*m30) + m12*(m21*m30 - m20*m31),
-	    m20*(m02*m31 - m01*m32) + m21*(m00*m32 - m02*m30) + m22*(m01*m30 - m00*m31),
-	    m30*(m02*m11 - m01*m12) + m31*(m00*m12 - m02*m10) + m32*(m01*m10 - m00*m11),
-	    m00*(m11*m22 - m12*m21) + m01*(m12*m20 - m10*m22) + m02*(m10*m21 - m11*m20)
+	    m01*(m22*m13 - m12*m23) + m11*(m02*m23 - m22*m03) + m21*(m12*m03 - m02*m13),
+	    m02*(m20*m13 - m10*m23) + m12*(m00*m23 - m20*m03) + m22*(m10*m03 - m00*m13),
+	    m03*(m20*m11 - m10*m21) + m13*(m00*m21 - m20*m01) + m23*(m10*m01 - m00*m11),
+	    m00*(m11*m22 - m21*m12) + m10*(m21*m02 - m01*m22) + m20*(m01*m12 - m11*m02)
 	    );
 
 	mul(s);
@@ -1100,12 +1100,12 @@ public class Matrix4f implements Serializable {
     public final float determinant()  {
 	// less *,+,- calculation than expanded expression.
 	return
-	    (m00*m11 - m01*m10)*(m22*m33 - m23*m32)
-	   -(m00*m12 - m02*m10)*(m21*m33 - m23*m31)
-	   +(m00*m13 - m03*m10)*(m21*m32 - m22*m31)
-	   +(m01*m12 - m02*m11)*(m20*m33 - m23*m30)
-	   -(m01*m13 - m03*m11)*(m20*m32 - m22*m30)
-	   +(m02*m13 - m03*m12)*(m20*m31 - m21*m30);
+	    (m00*m11 - m10*m01)*(m22*m33 - m32*m23)
+	   -(m00*m21 - m20*m01)*(m12*m33 - m32*m13)
+	   +(m00*m31 - m30*m01)*(m12*m23 - m22*m13)
+	   +(m10*m21 - m20*m11)*(m02*m33 - m32*m03)
+	   -(m10*m31 - m30*m11)*(m02*m23 - m22*m03)
+	   +(m20*m31 - m30*m21)*(m02*m13 - m12*m03);
 
     }
 
@@ -1619,7 +1619,7 @@ public class Matrix4f implements Serializable {
 	       Float.floatToIntBits(m01) ^
 	       Float.floatToIntBits(m02) ^
 	       Float.floatToIntBits(m03) ^
-               Float.floatToIntBits(m10) ^
+           Float.floatToIntBits(m10) ^
 	       Float.floatToIntBits(m11) ^
 	       Float.floatToIntBits(m12) ^
 	       Float.floatToIntBits(m13) ^
