@@ -294,18 +294,11 @@ public class World {
 	
 	private Matrix4f CreateLeftHandedPerspective(float fov, float aspect, float zNear, float zFar) {
 	    float top = zNear * (float) Math.tan(fov * MathF.PI_OVER_360);
-	    float bottom = -top;
 	    float right = top * aspect;
-	    float left = bottom * aspect;
 	    
-	    /*return new Matrix4f(2 * zNear / (right - left),	0,0, 0,
-				0, 2 * zNear / (top - bottom), 0, 0,
-				0, 0, -(zFar + zNear) / (zFar - zNear), -1,
-				0, 0, (-2 * zFar * zNear) / (zFar - zNear), 0);*/
-	    
-		Matrix4f retVal = new Matrix4f(2 * zNear / (right - left),	0,0, 0,
-							0, 2 * zNear / (top - bottom), 0, 0,
-							0, 0, (zFar + zNear) / (zFar - zNear), (2 * zFar * zNear) / (zFar - zNear),
+		Matrix4f retVal = new Matrix4f(zNear / right,	0,0, 0,
+							0, zNear / top, 0, 0,
+							0, 0, -(zFar + zNear) / (zFar - zNear), (-2 * zFar * zNear) / (zFar - zNear),
 							0, 0, -1, 0);
 		retVal.transpose();
 		return retVal;
