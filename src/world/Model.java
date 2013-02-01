@@ -58,9 +58,9 @@ public class Model {
 		
 		try {
 			texture = TextureLoader.getTexture(name + ".jpg");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			
-			System.err.println("Error: Texture file could not be opened\n" + e.toString());
+			System.err.println("Error: Texture could not be loaded");
 		}
 		
 	}

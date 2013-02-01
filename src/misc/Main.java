@@ -3,6 +3,8 @@ package misc;
 import world.terrain.*;
 import world.*;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
+
 import vecmath.Vector3f;
 import vecmath.Vector3i;
 
@@ -15,17 +17,23 @@ public class Main implements InputObserver {
 		
 		System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Robots");
 		// To change app icon on Mac, use -Xdock:icon option
-		
+		Display.setResizable(true);
+
 		world = new World();
 		
 		Terrain terrain = new Terrain(System.nanoTime(), world);
 		terrain.load(new Vector3i(0,0,0));
 		
-		world.getViewPoint().setPosition(new Vector3f(0,0,0));
-		world.getViewPoint().setOrientation(new Vector3f(0,MathF.degreesToRadians(0),0));
+		//world.getViewPoint().setPosition(new Vector3f(0,0,0));
+		//world.getViewPoint().setOrientation(new Vector3f(0,MathF.degreesToRadians(0),0));
+		
+		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint());
+		player.setPosition(new Vector3f(0f,1,0f));
+		world.addObject(player);
+		
 		o = new VisibleObject("banana");
 		o.setPosition(new Vector3f(0,0,-.5f));
-		world.setViewPoint(new TargetedViewPoint(o, -100));
+		//world.setViewPoint(new TargetedViewPoint(o, -100));
 		//p = new VisibleObject("cube");
 		//p.setPosition(new Vector3f(.5f,10f,-50));
 		Main mainObject = new Main();
@@ -86,7 +94,7 @@ public class Main implements InputObserver {
 			else if (key == Keyboard.KEY_6) {
 				o.move(new Vector3f(0,0,1));
 			}
-			*/
+			/*
 			if (key == Keyboard.KEY_1) {
 				world.getViewPoint().rotate(new Vector3f(MathF.degreesToRadians(-1),0,0));
 			}
@@ -126,24 +134,20 @@ public class Main implements InputObserver {
 			}
 			*/
 			//System.out.println(world.getViewPoint().getTransformationMatrix());
-			System.out.println(o.getTransformationMatrix());
+			//System.out.println(o.getTransformationMatrix());
 		}
 	}
 	
 	public void mouseMoved(int x, int y, int dx, int dy) {
-		System.out.println("Mouse: X=" + dx + " Y=" + dy);
 	}
 	
 	public void mouseDown(int button) {
-		System.out.println("Mouse button " + button + " down");
 	}
 	
 	public void mouseUp(int button) {
-		System.out.println("Mouse button " + button + " up");
 	}
 	
 	public void scroll(int scrollDistance) {
-		System.out.println("Scrolled: " + scrollDistance);
 	}
 
 }

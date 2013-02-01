@@ -1,4 +1,5 @@
 package world;
+import misc.MathF;
 import vecmath.Matrix4f;
 import vecmath.Vector3f;
 
@@ -10,7 +11,7 @@ public class ViewPoint extends WorldObject {
 	private float farViewDistance;
 		
 	public ViewPoint() {
-		fieldOfView = (float) Math.toRadians(65f);
+		fieldOfView = (float) MathF.toRadians(15f);
 		nearViewDistance = .1f;
 		farViewDistance = 500.0f;
 	}

@@ -11,7 +11,7 @@ public class Terrain {
 	private long seed;
 	private final int CHUNK_LOAD_DISTANCE = 20;
 	private HashMap<Vector3i, Chunk> loadedChunks = new HashMap<Vector3i, Chunk>(CHUNK_LOAD_DISTANCE * 6);
-	private final int CHUNK_SIZE = 3;
+	private final int CHUNK_SIZE = 5;
 	private TerrainGenerator generator;
 	private World world;
 	

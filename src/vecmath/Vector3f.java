@@ -141,7 +141,7 @@ public class Vector3f extends Tuple3f implements Serializable {
       public final float length() {
 	  return (float)Math.sqrt(lengthSquared());
       }
-
+      
     /**
       * Sets this vector to be the vector cross product of vectors v1 and v2.
       * @param v1 the first vector
@@ -205,5 +205,11 @@ public class Vector3f extends Tuple3f implements Serializable {
 	double cross = Math.sqrt(xx*xx + yy*yy + zz*zz);
 
 	return (float)Math.abs(Math.atan2(cross, dot(v1)));
+    }
+    
+    public float distance(Vector3f v1) {
+    	Vector3f difference = new Vector3f();
+    	difference.sub(this, v1);
+    	return (float)Math.sqrt(difference.x * difference.x + difference.y * difference.y + difference.z * difference.z);
     }
 }

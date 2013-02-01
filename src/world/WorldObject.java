@@ -2,19 +2,19 @@ package world;
 
 import vecmath.Vector3f;
 import vecmath.Matrix4f;
-import java.util.ArrayList;
+
+import java.util.LinkedHashSet;
 
 public class WorldObject {
 	
 	protected Vector3f position;
 	protected Vector3f orientation;
 	
-	private ArrayList<WorldObjectMovementObserver> observers;
+	private LinkedHashSet<WorldObjectMovementObserver> observers = new LinkedHashSet<WorldObjectMovementObserver>();
 	
 	public WorldObject() {
 		position = new Vector3f();
 		orientation = new Vector3f();
-		observers = new ArrayList<WorldObjectMovementObserver>();
 	}
 	
 	public void prepareToUpdate(double timeElapsed) {
@@ -25,16 +25,20 @@ public class WorldObject {
 		
 	}
 	
+	public void worldPaused(World w) {
+		
+	}
+	
+	public void worldResumed(World w) {
+		
+	}
+	
 	public void move(Vector3f distance) {
 		
 		Vector3f newPosition = new Vector3f(position);
 		newPosition.add(distance);
 		
-		notifyObserversWillMove(newPosition);
-
-		position.set(newPosition);
-		
-		notifyObserversDidMove();
+		setPosition(newPosition);
 	}
 	
 	public Vector3f getPosition() {

@@ -5,7 +5,7 @@ import misc.InputHandler;
 import misc.MathF;
 import java.awt.Window;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -35,14 +35,14 @@ public class World {
 	private final int GL_MAJOR_VERSION = 3;
 	private final int GL_MINOR_VERSION = 2;
 	
-	private ArrayList<WorldUpdateObserver> observers;
-	private ArrayList<VisibleObject> visibleObjects;
-	private ArrayList<WorldObject> worldObjects;
+	private LinkedHashSet<WorldUpdateObserver> observers = new LinkedHashSet<WorldUpdateObserver>();
+	private LinkedHashSet<VisibleObject> visibleObjects = new LinkedHashSet<VisibleObject>();
+	private LinkedHashSet<WorldObject> worldObjects = new LinkedHashSet<WorldObject>();
 
 	private volatile boolean isRunning;
 	private volatile boolean isPaused;
 	
-	private final int TARGET_FPS = 60;
+	private final int TARGET_FPS = 30;
 	
 	private SoundManager soundManager;
 	
@@ -60,10 +60,6 @@ public class World {
 	private double timeSinceLastUpdate;
 	
 	public World() {
-		
-		observers = new ArrayList<WorldUpdateObserver>();
-		visibleObjects = new ArrayList<VisibleObject>();
-		worldObjects = new ArrayList<WorldObject>();
 
 		viewPoint = new ViewPoint();
 		
@@ -81,7 +77,6 @@ public class World {
 			PixelFormat pixelFormat = new PixelFormat(alphaBufferPrecision, depthBufferPrecision, stencilBufferPrecision);
 			ContextAttribs contextAtrributes = new ContextAttribs(GL_MAJOR_VERSION, GL_MINOR_VERSION).withProfileCore(true).withForwardCompatible(true);			 
 			Display.create(pixelFormat, contextAtrributes);
-			Display.setResizable(true);
 			isRunning = true;
 			
 		} catch (LWJGLException le) {
@@ -187,14 +182,29 @@ public class World {
 	
 	public void start() {
 		setPaused(false);
-		
+		for (WorldUpdateObserver o : observers) {
+			o.worldStarted(this);
+		}
+		boolean wasPaused = isPaused();
 		timeSinceLastUpdate = Timer.getTime();
 		while (isRunning) {
 			glViewport(0, 0, Display.getWidth(), Display.getHeight());
 			if (!isPaused) {
+				if (wasPaused) {
+					for (WorldUpdateObserver o : observers) {
+						o.worldResumed(this);
+					}
+					wasPaused = false;
+				}
 				updateObjects();
 				notifyObservers();
 				timeSinceLastUpdate = Timer.getTime();
+			}
+			else if (!wasPaused) {
+				for (WorldUpdateObserver o : observers) {
+					o.worldPaused(this);
+				}
+				wasPaused = true;
 			}
 			drawFrame();
 			Display.update();
@@ -203,6 +213,9 @@ public class World {
 			if (Display.isCloseRequested()) {
 				isRunning = false;
 			}
+		}
+		for (WorldUpdateObserver o : observers) {
+			o.worldClosed(this);
 		}
 		tearDownGL();
 	}
@@ -240,48 +253,56 @@ public class World {
 		Matrix3f normalMatrix;
 		FloatBuffer modelViewProjectionBuffer;
 		FloatBuffer normalBuffer;
-		
+		Model model;
+		Shader shader;
+		Texture texture;
 		for (VisibleObject o : visibleObjects) {
-			modelMatrix = o.getTransformationMatrix();
-			modelViewMatrix = new Matrix4f();
-			modelViewMatrix.mul(viewMatrix, modelMatrix);
-			
-			normalMatrix = new Matrix3f();
-			modelViewMatrix.get(normalMatrix);
-			normalMatrix.invert();
-			normalMatrix.transpose();
-			
-			modelViewProjectionMatrix = new Matrix4f();
-			modelViewProjectionMatrix.mul(projectionMatrix, modelViewMatrix);
-			
-			glUseProgram(o.getShader().getProgram());
-			
-			modelViewProjectionBuffer = BufferUtils.createFloatBuffer(16);
-			normalBuffer = BufferUtils.createFloatBuffer(9);
-			
-			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
-			modelViewProjectionBuffer.flip();
-			glUniformMatrix4(o.getShader().getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
-			normalMatrix.store(normalBuffer);
-			normalBuffer.flip();
-			glUniformMatrix3(o.getShader().getNormalMatrixUniformLocation(), false, normalBuffer);
-			
-			o.getModel().getTexture().bind();
-			glUniform1i(o.getShader().getTextureUniformLocation(), 0);
-			
-			glBindVertexArray(o.getModel().getVertexArray());
-			
-			glBindBuffer(GL_ARRAY_BUFFER, o.getModel().getBuffer());
-			
-			
-			//System.out.println(modelViewProjectionMatrix);
-			
-			// Bind to the index VBO that has all the information about the order of the vertices
-			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o.getModel().getElementBuffer());
-			
-			// Draw the vertices
-			//glDrawElements(GL_TRIANGLES, o.getModel().getSize(), GL_UNSIGNED_BYTE, 0);
-			glDrawArrays(GL_TRIANGLES, 0, o.getModel().getVertexCount());
+			model = o.getModel();
+			shader = o.getShader();
+			if (model != null && shader != null) {
+				modelMatrix = o.getTransformationMatrix();
+				modelViewMatrix = new Matrix4f();
+				modelViewMatrix.mul(viewMatrix, modelMatrix);
+				
+				normalMatrix = new Matrix3f();
+				modelViewMatrix.get(normalMatrix);
+				normalMatrix.invert();
+				normalMatrix.transpose();
+				
+				modelViewProjectionMatrix = new Matrix4f();
+				modelViewProjectionMatrix.mul(projectionMatrix, modelViewMatrix);
+				
+				glUseProgram(shader.getProgram());
+				
+				modelViewProjectionBuffer = BufferUtils.createFloatBuffer(16);
+				normalBuffer = BufferUtils.createFloatBuffer(9);
+				
+				modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+				modelViewProjectionBuffer.flip();
+				glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+				normalMatrix.store(normalBuffer);
+				normalBuffer.flip();
+				glUniformMatrix3(shader.getNormalMatrixUniformLocation(), false, normalBuffer);
+				
+				texture = model.getTexture();
+				if (texture != null) {
+					texture.bind();
+					glUniform1i(shader.getTextureUniformLocation(), 0);
+				}
+				glBindVertexArray(model.getVertexArray());
+				
+				glBindBuffer(GL_ARRAY_BUFFER, model.getBuffer());
+				
+				
+				//System.out.println(modelViewProjectionMatrix);
+				
+				// Bind to the index VBO that has all the information about the order of the vertices
+				//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o.getModel().getElementBuffer());
+				
+				// Draw the vertices
+				//glDrawElements(GL_TRIANGLES, o.getModel().getSize(), GL_UNSIGNED_BYTE, 0);
+				glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+			}
 		}
 	}
 	
@@ -293,13 +314,13 @@ public class World {
 	}
 	
 	private Matrix4f CreateLeftHandedPerspective(float fov, float aspect, float zNear, float zFar) {
-	    float top = zNear * (float) Math.tan(fov * MathF.PI_OVER_360);
-	    float right = top * aspect;
+	    float f = 1.0f / MathF.tan(fov*0.5f);
+	    //float right = top * aspect;
 	    
-		Matrix4f retVal = new Matrix4f(zNear / right,	0,0, 0,
-							0, zNear / top, 0, 0,
-							0, 0, -(zFar + zNear) / (zFar - zNear), (-2 * zFar * zNear) / (zFar - zNear),
-							0, 0, -1, 0);
+		Matrix4f retVal = new Matrix4f(f / aspect,	0,0, 0,
+							0, f, 0, 0,
+							0, 0, (zFar + zNear) / (zFar - zNear), (-2 * zFar * zNear) / (zFar - zNear),
+							0, 0, 1, 0);
 		retVal.transpose();
 		return retVal;
 	}

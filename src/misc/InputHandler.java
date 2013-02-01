@@ -1,12 +1,12 @@
 package misc;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 public class InputHandler {
 	
-	private static ArrayList<InputObserver> observers = new ArrayList<InputObserver>();
+	private static LinkedHashSet<InputObserver> observers = new LinkedHashSet<InputObserver>();
 		
 	public static void addObserver(InputObserver o) {
 		observers.add(o);
