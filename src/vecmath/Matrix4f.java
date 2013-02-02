@@ -917,6 +917,13 @@ public class Matrix4f implements Serializable {
 	m20 -= m1.m20; m21 -= m1.m21; m22 -= m1.m22; m23 -= m1.m23;
 	m30 -= m1.m30; m31 -= m1.m31; m32 -= m1.m32; m33 -= m1.m33;
     }
+    
+    public final void divide(float scalar) {
+	m00 /= scalar; m01 /= scalar; m02 /= scalar; m03 /= scalar;
+	m10 /= scalar; m11 /= scalar; m12 /= scalar; m13 /= scalar;
+	m20 /= scalar; m21 /= scalar; m22 /= scalar; m23 /= scalar;
+	m30 /= scalar; m31 /= scalar; m32 /= scalar; m33 /= scalar;
+    }
 
     /**
       * Sets the value of this matrix to its transpose. 

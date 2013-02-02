@@ -212,4 +212,8 @@ public class Vector3f extends Tuple3f implements Serializable {
     	difference.sub(this, v1);
     	return (float)Math.sqrt(difference.x * difference.x + difference.y * difference.y + difference.z * difference.z);
     }
+    
+    public float innerProduct(Vector3f v) {
+    	return x * v.x + y * v.y + z * v.z;
+    }
 }

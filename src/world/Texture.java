@@ -186,4 +186,8 @@ public class Texture {
 			widthRatio = ((float) width) / texWidth;
 		}
 	}
+	
+	public int getID() {
+		return textureID;
+	}
 }

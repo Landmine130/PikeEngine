@@ -5,15 +5,14 @@ import world.WorldObject;
 
 public class Chunk {
 
+	public static final int CHUNK_SIZE = 32;
+
 	private Vector3i position;
 	
 	private WorldObject[][][] objects;
-	
-	private Vector3i size;
-	
-	public Chunk(Vector3i size, Vector3i position) {
-		objects = new WorldObject[size.x][size.y][size.z];
-		this.size = size;
+		
+	public Chunk(Vector3i position) {
+		objects = new WorldObject[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 		this.position = position;
 	}
 	
@@ -31,10 +30,6 @@ public class Chunk {
 	
 	public void set(WorldObject o, int x, int y, int z) {
 		objects[x][y][z] = o;
-	}
-	
-	public Vector3i getSize() {
-		return size;
 	}
 	
 	public Vector3i getPosition() {

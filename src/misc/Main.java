@@ -1,5 +1,7 @@
 package misc;
 
+import java.nio.FloatBuffer;
+
 import world.terrain.*;
 import world.*;
 import org.lwjgl.input.Keyboard;
@@ -9,7 +11,7 @@ import vecmath.Vector3f;
 import vecmath.Vector3i;
 
 public class Main implements InputObserver {
-	
+		
 	private static World world;
 	private static VisibleObject o;
 	private static VisibleObject p;
@@ -20,31 +22,43 @@ public class Main implements InputObserver {
 		Display.setResizable(true);
 
 		world = new World();
-		
+		world.setSkybox(new Skybox());
 		Terrain terrain = new Terrain(System.nanoTime(), world);
 		terrain.load(new Vector3i(0,0,0));
-		
+		terrain.load(new Vector3i(0,0,-1));
+		terrain.load(new Vector3i(-1,0,0));
+		terrain.load(new Vector3i(-1,0,-1));
+
 		//world.getViewPoint().setPosition(new Vector3f(0,0,0));
-		//world.getViewPoint().setOrientation(new Vector3f(0,MathF.degreesToRadians(0),0));
+		//world.getViewPoint().setOrientation(new Vector3f(0,MathF.toRadians(0),0));
 		
 		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint());
-		player.setPosition(new Vector3f(0f,1,0f));
+		player.setPosition(new Vector3f(0f,1.5f,0f));
 		world.addObject(player);
 		
-		o = new VisibleObject("banana");
-		o.setPosition(new Vector3f(0,0,-.5f));
-		//world.setViewPoint(new TargetedViewPoint(o, -100));
+		//o = new VisibleObject("cube");
+		//o.setPosition(new Vector3f(1f,0,30f));
+		//world.setViewPoint(new TargetedViewPoint(o, 10));
 		//p = new VisibleObject("cube");
 		//p.setPosition(new Vector3f(.5f,10f,-50));
 		Main mainObject = new Main();
+		Timer t = new Timer(1, -1, mainObject, "printFPS");
+		t.start();
 		InputHandler.addObserver(mainObject);
-		world.addObject(o);
+		//world.addObject(o);
 		//world.addObject(p);
 		
 		
 		
 		
 		world.start();
+	}
+	
+	public void printFPS(Timer t) {
+		System.out.println(world.getFPS());
+		if (!world.isRunning()) {
+			t.stop();
+		}
 	}
 	
 	public void keyUp(int key) {
@@ -96,22 +110,22 @@ public class Main implements InputObserver {
 			}
 			/*
 			if (key == Keyboard.KEY_1) {
-				world.getViewPoint().rotate(new Vector3f(MathF.degreesToRadians(-1),0,0));
+				world.getViewPoint().rotate(new Vector3f(MathF.toRadians(-1),0,0));
 			}
 			else if (key == Keyboard.KEY_2) {
-				world.getViewPoint().rotate(new Vector3f(MathF.degreesToRadians(1),0,0));
+				world.getViewPoint().rotate(new Vector3f(MathF.toRadians(1),0,0));
 			}
 			else if (key == Keyboard.KEY_3) {
-				world.getViewPoint().rotate(new Vector3f(0,MathF.degreesToRadians(-1),0));
+				world.getViewPoint().rotate(new Vector3f(0,MathF.toRadians(-1),0));
 			}
 			else if (key == Keyboard.KEY_4) {
-				world.getViewPoint().rotate(new Vector3f(0,MathF.degreesToRadians(1),0));
+				world.getViewPoint().rotate(new Vector3f(0,MathF.toRadians(1),0));
 			}
 			else if (key == Keyboard.KEY_5) {
-				world.getViewPoint().rotate(new Vector3f(0,0,MathF.degreesToRadians(-1)));
+				world.getViewPoint().rotate(new Vector3f(0,0,MathF.toRadians(-1)));
 			}
 			else if (key == Keyboard.KEY_6) {
-				world.getViewPoint().rotate(new Vector3f(0,0,MathF.degreesToRadians(1)));
+				world.getViewPoint().rotate(new Vector3f(0,0,MathF.toRadians(1)));
 			}
 			/*
 			if (key == Keyboard.KEY_1) {

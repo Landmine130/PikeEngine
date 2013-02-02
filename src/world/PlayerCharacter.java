@@ -13,6 +13,8 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 	
 	private ViewPoint viewPoint;
 	
+	private float movementSpeed = 2.5f;
+	
 	public PlayerCharacter(String modelName, ViewPoint viewPoint) {
 		super(modelName);
 		this.viewPoint = viewPoint;
@@ -89,20 +91,20 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 		float zSpeed = 0;
 
 		if (Keyboard.isKeyDown(Keyboard.KEY_W) && !Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			zSpeed = MathF.sin(-viewPoint.getOrientation().y + MathF.PI_OVER_2);
-			xSpeed = MathF.cos(-viewPoint.getOrientation().y + MathF.PI_OVER_2);
+			zSpeed = MathF.sin(-viewPoint.getOrientation().y + MathF.PI_OVER_2) * movementSpeed;
+			xSpeed = MathF.cos(-viewPoint.getOrientation().y + MathF.PI_OVER_2) * movementSpeed;
 		}
 		else if (Keyboard.isKeyDown(Keyboard.KEY_S) && !Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			zSpeed = MathF.sin(-viewPoint.getOrientation().y - MathF.PI_OVER_2);
-			xSpeed = MathF.cos(-viewPoint.getOrientation().y - MathF.PI_OVER_2);
+			zSpeed = MathF.sin(-viewPoint.getOrientation().y - MathF.PI_OVER_2) * movementSpeed;
+			xSpeed = MathF.cos(-viewPoint.getOrientation().y - MathF.PI_OVER_2) * movementSpeed;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_D) && !Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			zSpeed += MathF.sin(-viewPoint.getOrientation().y);
-			xSpeed += MathF.cos(-viewPoint.getOrientation().y);
+			zSpeed += MathF.sin(-viewPoint.getOrientation().y) * movementSpeed;
+			xSpeed += MathF.cos(-viewPoint.getOrientation().y) * movementSpeed;
 		}
 		else if (Keyboard.isKeyDown(Keyboard.KEY_A) && !Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			zSpeed += MathF.sin(-viewPoint.getOrientation().y + MathF.PI);
-			xSpeed += MathF.cos(-viewPoint.getOrientation().y + MathF.PI);
+			zSpeed += MathF.sin(-viewPoint.getOrientation().y + MathF.PI) * movementSpeed;
+			xSpeed += MathF.cos(-viewPoint.getOrientation().y + MathF.PI) * movementSpeed;
 		}
 		setXSpeed(xSpeed);
 		setZSpeed(zSpeed);
@@ -138,12 +140,10 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 	}
 	
 	public void worldPaused(World w) {
-		System.out.println("Paused");
 		InputHandler.removeObserver(this);
 	}
 	
 	public void worldResumed(World w) {
-		System.out.println("Resumed");
 		InputHandler.addObserver(this);
 	}
 }

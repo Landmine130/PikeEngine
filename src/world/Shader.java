@@ -7,17 +7,18 @@ import org.lwjgl.util.glu.GLU;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
 
 public class Shader {
 	
 	public static final String shaderFilePath = "Resources/Shaders/";
 	
+	public static final Shader shader = new Shader();
+	
 	private int program;
 	
-	private int modelViewProjectionMatrixUniformLocation;
-	private int normalMatrixUniformLocation;
-	private int textureUniformLocation;
+	protected int modelViewProjectionMatrixUniformLocation;
+	protected int normalMatrixUniformLocation;
+	protected int textureUniformLocation;
 	
 	public static final int POSITION_ATTRIBUTE_LOCATION = 0;
 	public static final int NORMAL_ATTRIBUTE_LOCATION = 1;
@@ -25,26 +26,19 @@ public class Shader {
 	
 	public Shader() {
 		glGetError();
-
-		int vertexShader = loadShader(shaderFilePath + "shader.vsh", GL_VERTEX_SHADER);
-		int fragmentShader = loadShader(shaderFilePath + "shader.fsh", GL_FRAGMENT_SHADER);
+		
+		int vertexShader = loadShader(shaderFilePath + vertexShaderName(), GL_VERTEX_SHADER);
+		int fragmentShader = loadShader(shaderFilePath + fragmentShaderName(), GL_FRAGMENT_SHADER);
 		
 		program = glCreateProgram();
 		glAttachShader(program, vertexShader);
 		glAttachShader(program, fragmentShader);
 		 
-		glBindAttribLocation(program, POSITION_ATTRIBUTE_LOCATION, "position");
-		glBindAttribLocation(program, NORMAL_ATTRIBUTE_LOCATION, "normal");
-		glBindAttribLocation(program, TEXTURE_COORDINATE_ATTRIBUTE_LOCATION, "textureCoordinateIn");
-		 
-		//glBindFragDataLocation(program, 0, "colorOut");
-		
+		bindVariableLocations(program);
+		 		
 		glLinkProgram(program);
 		
-		// Get matrices uniform locations
-		modelViewProjectionMatrixUniformLocation = glGetUniformLocation(program, "modelViewProjectionMatrix");
-		normalMatrixUniformLocation = glGetUniformLocation(program, "normalMatrix");
-		textureUniformLocation = glGetUniformLocation(program, "Texture");
+		getVariableLocations(program);
 
 		glValidateProgram(program);
 		
@@ -53,7 +47,27 @@ public class Shader {
 			String errorString = GLU.gluErrorString(errorValue);
 			System.err.println("Error: Could not create shader program:\n" + errorValue + "\n" + errorString);
 		}
-
+	}
+	
+	protected String vertexShaderName() {
+		return "shader.vsh";
+	}
+	
+	protected String fragmentShaderName() {
+		return "shader.fsh";
+	}
+	
+	protected void bindVariableLocations(int program) {
+		
+		glBindAttribLocation(program, POSITION_ATTRIBUTE_LOCATION, "position");
+		glBindAttribLocation(program, NORMAL_ATTRIBUTE_LOCATION, "normal");
+		glBindAttribLocation(program, TEXTURE_COORDINATE_ATTRIBUTE_LOCATION, "textureCoordinateIn");
+	}
+	
+	protected void getVariableLocations(int program) {
+		modelViewProjectionMatrixUniformLocation = glGetUniformLocation(program, "modelViewProjectionMatrix");
+		normalMatrixUniformLocation = glGetUniformLocation(program, "normalMatrix");
+		textureUniformLocation = glGetUniformLocation(program, "textureSampler");
 	}
 	
 	public int getProgram() {
@@ -80,16 +94,15 @@ public class Shader {
 		StringBuilder shaderSource = new StringBuilder();
 		int shaderID;
 		try {
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-		String line;
-		while ((line = reader.readLine()) != null) {
-		shaderSource.append(line).append("\n");
-		}
-		reader.close();
+			BufferedReader reader = new BufferedReader(new FileReader(filename));
+			String line;
+			while ((line = reader.readLine()) != null) {
+			shaderSource.append(line).append("\n");
+			}
+			reader.close();
 		} catch (IOException e) {
-		System.err.println("Could not read file.");
-		e.printStackTrace();
-		System.exit(-1);
+			System.err.println("Could not read file.");
+			e.printStackTrace();
 		}
 		 
 		shaderID = glCreateShader(type);

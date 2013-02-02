@@ -56,6 +56,8 @@ import javax.swing.ImageIcon;
 import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 /**
  * A utility class to load textures for OpenGL. This source is based
@@ -108,11 +110,7 @@ public class TextureLoader {
             return tex;
         }
 
-        tex = getTexture(resourceName,
-                         GL_TEXTURE_2D, // target
-                         GL_RGBA,     // dst pixel format
-                         GL_LINEAR, // min filter (unused)
-                         GL_LINEAR);
+        tex = getTexture(resourceName, GL_RGBA, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
         table.put(resourceName,tex);
 
@@ -136,18 +134,18 @@ public class TextureLoader {
      * @throws IOException Indicates a failure to access the resource
      */
     public static Texture getTexture(String resourceName,
-                              int target,
                               int dstPixelFormat,
                               int minFilter,
                               int magFilter) throws IOException {
         int srcPixelFormat;
-
+        
         // create the texture ID for this texture
+        
         int textureID = createTextureID();
-        Texture texture = new Texture(target,textureID);
+        Texture texture = new Texture(GL_TEXTURE_2D,textureID);
 
         // bind this texture
-        glBindTexture(target, textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
 
         BufferedImage bufferedImage = loadImage(resourceName);
         texture.setWidth(bufferedImage.getWidth());
@@ -162,13 +160,11 @@ public class TextureLoader {
         // convert that image into a byte buffer of texture data
         ByteBuffer textureBuffer = convertImageData(bufferedImage,texture);
 
-        if (target == GL_TEXTURE_2D) {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
-            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilter);
-        }
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 
         // produce a texture from the byte buffer
-        glTexImage2D(target,
+        glTexImage2D(GL_TEXTURE_2D,
                       0,
                       dstPixelFormat,
                       get2Fold(bufferedImage.getWidth()),
@@ -178,6 +174,10 @@ public class TextureLoader {
                       GL_UNSIGNED_BYTE,
                       textureBuffer );
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        
+       	glGenerateMipmap(GL_TEXTURE_2D);
         return texture;
     }
 

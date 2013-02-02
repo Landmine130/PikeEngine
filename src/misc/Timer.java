@@ -59,8 +59,8 @@ import java.lang.reflect.Method;
 
 public class Timer implements Runnable {
 
-	public Timer(double frequency, long duration, Object target, String selector) {
-		this.frequency = (float) frequency;
+	public Timer(double frequency, double duration, Object target, String selector) {
+		this.frequency = frequency;
 		this.duration = duration;
 		this.target = target;
 		try {
@@ -77,7 +77,7 @@ public class Timer implements Runnable {
 		}
 	}
 	
-	private final float frequency;
+	private final double frequency;
 	private final double duration;
 	private Method method;
 	private Object target;
@@ -90,7 +90,7 @@ public class Timer implements Runnable {
 		running = false;
 	}
 	
-	public float frequency() {
+	public double frequency() {
 		return frequency;
 	}
 	
@@ -134,12 +134,11 @@ public class Timer implements Runnable {
 	public void run() {
 		startTime = getTime();
 		endTime = startTime + duration;
-		double timePerLoop = Math.round(1000 / frequency);
+		double timePerLoop = 1 / frequency;
 		double sleepTime;
 		double lastTime = startTime;
 		double currentTime;
 		boolean stillWaiting;
-		
 		while ((duration < 0 || percentComplete() < 100) && running) {
 			do {
 				currentTime = getTime();
@@ -149,6 +148,7 @@ public class Timer implements Runnable {
 						Thread.sleep((long)(sleepTime * 1000));
 					}
 					stillWaiting = false;
+					lastTime = getTime();
 				} catch (InterruptedException e) {
 					stillWaiting = true;
 				}

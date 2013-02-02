@@ -10,12 +10,11 @@
 
 uniform sampler2D textureSampler;
 
-in lowp vec4 colorPass;
 in mediump vec2 textureCoordinatePass;
 
 out lowp vec4 colorOut;
 
 void main()
 {
-    colorOut = colorPass * texture(textureSampler, textureCoordinatePass);
+    colorOut = texture(textureSampler, textureCoordinatePass);
 }

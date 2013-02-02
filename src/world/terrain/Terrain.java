@@ -11,7 +11,6 @@ public class Terrain {
 	private long seed;
 	private final int CHUNK_LOAD_DISTANCE = 20;
 	private HashMap<Vector3i, Chunk> loadedChunks = new HashMap<Vector3i, Chunk>(CHUNK_LOAD_DISTANCE * 6);
-	private final int CHUNK_SIZE = 5;
 	private TerrainGenerator generator;
 	private World world;
 	
@@ -28,10 +27,10 @@ public class Terrain {
 	public WorldObject get(Vector3i position) {
 		
 		Vector3i chunkCoordinate = new Vector3i(position);
-		chunkCoordinate.div(CHUNK_SIZE);
+		chunkCoordinate.div(Chunk.CHUNK_SIZE);
 		
 		Vector3i blockCoordinate = new Vector3i(position);
-		blockCoordinate.mod(CHUNK_SIZE);
+		blockCoordinate.mod(Chunk.CHUNK_SIZE);
 		blockCoordinate.abs();
 		
 		Chunk chunk = loadedChunks.get(chunkCoordinate);
@@ -47,10 +46,10 @@ public class Terrain {
 	public void set(WorldObject o, Vector3i position) {
 		
 		Vector3i chunkCoordinate = new Vector3i(position);
-		chunkCoordinate.div(CHUNK_SIZE);
+		chunkCoordinate.div(Chunk.CHUNK_SIZE);
 		
 		Vector3i blockCoordinate = new Vector3i(position);
-		blockCoordinate.mod(CHUNK_SIZE);
+		blockCoordinate.mod(Chunk.CHUNK_SIZE);
 		blockCoordinate.abs();
 
 		Chunk chunk = loadedChunks.get(chunkCoordinate);
@@ -64,7 +63,7 @@ public class Terrain {
 	}
 	
 	public void load(Vector3i chunkPosition) {
-		loadedChunks.put(chunkPosition, generator.generateChunk(new Vector3i(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE), chunkPosition));
+		loadedChunks.put(chunkPosition, generator.generateChunk(chunkPosition));
 	}
 	
 	public void unload(Vector3i chunkPosition) {

@@ -214,6 +214,12 @@ public abstract class Tuple3f implements Serializable {
 	y += t1.y;
 	z += t1.z;
     }
+    
+    public final void add(float f1) {
+    	x += f1;
+    	y += f1;
+    	z += f1;
+        }
 
 
     /**
