@@ -15,7 +15,7 @@ public class ViewPoint extends WorldObject {
 	
 	public ViewPoint() {
 		nearViewDistance = .1f;
-		farViewDistance = 500.0f;
+		farViewDistance = 100.0f;
 		setFieldOfView(MathF.toRadians(65f));
 	}
 	
@@ -73,44 +73,25 @@ public class ViewPoint extends WorldObject {
 		return projectionMatrix;
 	}
 	
-	private Vector3f X,Y,negativeZ; // the camera referential
 	private float tang;
 	private float sphereFactorX;
 	private float sphereFactorY;
 	
 	public void setPosition(Vector3f position) {
 		super.setPosition(position);
-		calculateReferentials();
 	}
 	
 	public void setOrientation(Vector3f orientation) {
 		super.setOrientation(orientation);
-		calculateReferentials();
 	}
-	
-	private void calculateReferentials() {
-		Matrix4f rotation = new Matrix4f();
-		rotation.rotX(orientation.x);
-		rotation.rotY(orientation.y);
-		rotation.rotZ(orientation.z);
-		Matrix4f translation = new Matrix4f(Vector3f.Z_UNIT_VECTOR);
-		translation.mul(rotation, translation);
-		negativeZ = rotation.translationVector();
-		negativeZ.negate();
-		negativeZ.normalize();
-		translation = new Matrix4f(Vector3f.Y_UNIT_VECTOR);
-		translation.mul(rotation, translation);
-		Y = translation.translationVector();
-		Y.normalize();
-		translation = new Matrix4f(Vector3f.X_UNIT_VECTOR);
-		translation.mul(rotation, translation);
-		X = translation.translationVector();
-		X.normalize();
-		
-	}
+
+	private float aspectRatio;
 	
 	private void CreateLeftHandedPerspective(float fov, float aspect, float zNear, float zFar) {
-	    float f = 1.0f / MathF.tan(fov*0.5f);
+		aspectRatio = aspect;
+		fov *= .5f;
+		tang = MathF.tan(fov);
+	    float f = 1.0f / tang;
 		projectionMatrix = new Matrix4f(f / aspect,	0,0, 0,
 							0, f, 0, 0,
 							0, 0, (zFar + zNear) / (zFar - zNear), (-2 * zFar * zNear) / (zFar - zNear),
@@ -118,10 +99,9 @@ public class ViewPoint extends WorldObject {
 		projectionMatrix.transpose();
 		
 		// compute width and height of the near and far plane sections
-		tang = MathF.tan(fov);
 		sphereFactorY = 1/MathF.cos(fov);
 		// compute half of the the horizontal field of view and sphereFactorX
-		float anglex = MathF.atan(tang*fov);
+		float anglex = MathF.atan(tang*aspect);
 		sphereFactorX = 1/MathF.cos(anglex);
 	}
 	
@@ -129,27 +109,25 @@ public class ViewPoint extends WorldObject {
 		float d1,d2;
 		float az,ax,ay,zz1,zz2;
 
-		az = position.innerProduct(negativeZ);
+		az = offset.innerProduct(Vector3f.Z_UNIT_VECTOR);
 		if (az > farViewDistance + radius || az < nearViewDistance-radius) {
-			System.out.println("Z");
 			return false;
 		}
-
-		ax = offset.innerProduct(X);
-		zz1 = az * tang * fieldOfView;
+		
+		ax = offset.innerProduct(Vector3f.X_UNIT_VECTOR);
+		zz1 = az * tang * aspectRatio;
 		d1 = sphereFactorX * radius;
 		if (ax > zz1+d1 || ax < -zz1-d1) {
-			System.out.println("X");
 			return false;
 		}
-
-		ay = offset.innerProduct(Y);
+		
+		ay = offset.innerProduct(Vector3f.Y_UNIT_VECTOR);
 		zz2 = az * tang;
 		d2 = sphereFactorY * radius;
 		if (ay > zz2+d2 || ay < -zz2-d2) {
-			System.out.println("Y");
 			return false;
 		}
+		
 		return true;
 	}
 }

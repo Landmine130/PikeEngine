@@ -1,73 +1,60 @@
 package world.terrain;
 
 import java.util.HashMap;
-import java.util.MissingResourceException;
+import java.util.HashSet;
+
 import vecmath.Vector3i;
-import world.World;
-import world.WorldObject;
+import world.VisibleObject;
 
 public class Terrain {
 	
 	private long seed;
-	private final int CHUNK_LOAD_DISTANCE = 20;
-	private HashMap<Vector3i, Chunk> loadedChunks = new HashMap<Vector3i, Chunk>(CHUNK_LOAD_DISTANCE * 6);
+	private HashMap<Vector3i, VisibleObject> blockMap = new HashMap<Vector3i, VisibleObject>();
+	private HashSet<Vector3i> loadedBlocks = new HashSet<Vector3i>();
+
 	private TerrainGenerator generator;
-	private World world;
 	
-	public Terrain(long seed, World world) {
+	public Terrain(long seed) {
 		this.seed = seed;
-		generator = new TerrainGenerator(seed, world);
-		this.world = world;
+		generator = new TerrainGenerator(seed);
 	}
 	
 	public long getSeed() {
 		return seed;
 	}
 	
-	public WorldObject get(Vector3i position) {
+	public VisibleObject get(Vector3i position) {
 		
-		Vector3i chunkCoordinate = new Vector3i(position);
-		chunkCoordinate.div(Chunk.CHUNK_SIZE);
-		
-		Vector3i blockCoordinate = new Vector3i(position);
-		blockCoordinate.mod(Chunk.CHUNK_SIZE);
-		blockCoordinate.abs();
-		
-		Chunk chunk = loadedChunks.get(chunkCoordinate);
-		
-		if (chunk == null) {
-			
-			throw new MissingResourceException("Unloaded chunk at " + position.x + ", " + position.y + ", " + position.z + " was read", "Chunk", position.x + ", " + position.y + ", " + position.z);
+		VisibleObject o = null;
+		Vector3i tmp = new Vector3i(position);
+		if (loadedBlocks.contains(tmp)) {
+			o = blockMap.get(tmp);
 		}
-		
-		return chunk.get(blockCoordinate);
-	}
-	
-	public void set(WorldObject o, Vector3i position) {
-		
-		Vector3i chunkCoordinate = new Vector3i(position);
-		chunkCoordinate.div(Chunk.CHUNK_SIZE);
-		
-		Vector3i blockCoordinate = new Vector3i(position);
-		blockCoordinate.mod(Chunk.CHUNK_SIZE);
-		blockCoordinate.abs();
-
-		Chunk chunk = loadedChunks.get(chunkCoordinate);
-		
-		if (chunk == null) {
-			
-			throw new MissingResourceException("Unloaded chunk at " + position.x + ", " + position.y + ", " + position.z + " was written", "Chunk", position.x + ", " + position.y + ", " + position.z);
+		else {
+			o = load(tmp);
 		}
+		return o;
+	}
+	
+	public void set(VisibleObject o) {
 		
-		chunk.set(o, blockCoordinate);
+		Vector3i position = o.getPosition().toVector3i();
+		blockMap.put(position, o);
 	}
 	
-	public void load(Vector3i chunkPosition) {
-		loadedChunks.put(chunkPosition, generator.generateChunk(chunkPosition));
+	private VisibleObject load(Vector3i position) {
+		VisibleObject o = generator.generate(position);
+		blockMap.put(position, o);
+		loadedBlocks.add(position);
+		return o;
 	}
 	
-	public void unload(Vector3i chunkPosition) {
-		loadedChunks.remove(chunkPosition);
-		System.gc();
+	public void unload(Vector3i position) {
+		blockMap.remove(position);
+		loadedBlocks.remove(position);
+	}
+	
+	public boolean isLoaded(Vector3i position) {
+		return blockMap.get(position) != null;
 	}
 }

@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Model {
 
-    protected static HashMap<String, Model> loadedModels = new HashMap<String, Model>();
+    private static HashMap<String, Model> loadedModels = new HashMap<String, Model>();
 	
 	public static final String MODELDATA_PATH = "Resources/Models/";
 	
@@ -151,10 +151,12 @@ public class Model {
 		this.texture = texture;
 	}
 
+	private static final int FLOAT_BYTE_COUNT = Float.SIZE / Byte.SIZE;
+	private static final int HEADER_SIZE = 3;
 	
 	protected void loadModelDataForName(String name) throws FileNotFoundException, IOException {
 		File file = new File(name);
-		int dataSize = (int)(file.length() / 4) - 3;
+		int dataSize = (int)(file.length() / FLOAT_BYTE_COUNT) - HEADER_SIZE;
 		
 		DataInputStream reader = new DataInputStream(new FileInputStream(file));
 		

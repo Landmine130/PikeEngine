@@ -64,6 +64,11 @@ public abstract class Tuple3f implements Serializable {
 
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5494374691543161539L;
+
+	/**
       * The x coordinate.
       */
     public float x;
@@ -120,6 +125,12 @@ public abstract class Tuple3f implements Serializable {
 	y = (float)t1.y;
 	z = (float)t1.z;
     }
+    
+    public Tuple3f(Tuple3i t1) {
+    	x = (float)t1.x;
+    	y = (float)t1.y;
+    	z = (float)t1.z;
+    }
 
     /**
       * Constructs and initializes a Tuple3f to (0,0,0).
@@ -168,10 +179,16 @@ public abstract class Tuple3f implements Serializable {
       * @param t1 the tuple to be copied
       */
     public final void set(Tuple3d t1) {
-	x = (float)t1.x;
-	y = (float)t1.y;
-	z = (float)t1.z;
+		x = (float)t1.x;
+		y = (float)t1.y;
+		z = (float)t1.z;
     }
+    
+    public final void set(Tuple3i t1) {
+ 		x = (float)t1.x;
+ 		y = (float)t1.y;
+ 		z = (float)t1.z;
+     }
 
     /**
       * Copies the value of the elements of this tuple into the array t[]. 

@@ -11,29 +11,22 @@ class SurfaceTerrainFeature extends TerrainFeature {
 		super(position, seed);
 	}
 
-	public void addFeature(Chunk chunk) {
+	public void addFeature(WorldObject object) {
 		
-		Vector3i offset = new Vector3i();
-		offset.add(getPosition(), chunk.getPosition());
+		Vector3i offset = getPosition();
+		Vector3i position = object.getPosition().toVector3i();
+		offset.add(position);
 		
-		int[][] heightMap = generateHeightMap(chunk.getSize().x, chunk.getSize().z);
-		
-		for (int i = 0; i < heightMap.length; i++) {
-			for (int j = 0; j < heightMap[i].length; j++) {
-				
-				WorldObject o = new VisibleObject("banana");
-				int y = heightMap[i][j];
-				o.setPosition(new Vector3f(i, y, j));
-				chunk.set(o, i, y, j);
-			}
-		}
+		int height = getHeight(offset);
+		WorldObject o = new VisibleObject("cube");
+		o.setPosition(new Vector3f(position.x, height, position.z));
 	}
 	
-	private int[][] generateHeightMap(int width, int depth) {
-		int[][] heightMap = new int[width][depth];
+	private int getHeight(Vector3i offset) {
+		int height = 0;
 		
 		
 		
-		return heightMap;
+		return height;
 	}
 }

@@ -22,9 +22,14 @@ public class MathF {
 	public static float tan(float angle) {
 		return (float)Math.tan(angle);
 	}
-	
 	public static float atan(float f) {
 		return (float)Math.atan(f);
+	}
+	public static float atan2(float f, float f2) {
+		return (float)Math.atan2(f, f2);
+	}
+	public static float sqrt(float f) {
+		return (float)Math.sqrt(f);
 	}
 
 }

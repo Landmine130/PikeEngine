@@ -1,6 +1,23 @@
 package world;
 
-public class Skybox {
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4;
+import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+
+import misc.MathF;
+import vecmath.Matrix4f;
+import vecmath.Vector3f;
+
+public class Skybox implements Drawable {
 	
 	private static final String SKYBOX_PATH = "Resources/Skybox/"; 
 
@@ -78,5 +95,165 @@ public class Skybox {
 	
 	public Shader getShader() {
 		return shader;
+	}
+
+	private FloatBuffer modelViewProjectionBuffer = BufferUtils.createFloatBuffer(16);
+	
+	public void drawInWorld(World world) {
+		
+		ViewPoint viewPoint = world.getViewPoint();
+		glUseProgram(shader.getProgram());
+		
+		Matrix4f viewMatrix = new Matrix4f();
+	    viewMatrix.rotX(-viewPoint.getOrientation().x);
+	    viewMatrix.rotY(-viewPoint.getOrientation().y);
+	    viewMatrix.rotZ(-viewPoint.getOrientation().z);
+	    
+	    Matrix4f modelViewProjectionMatrix;
+		Texture texture;
+		Model model;
+		Matrix4f projectionMatrix = viewPoint.getProjectionMatrix();
+		
+		model = getFront();
+		
+		glBindVertexArray(model.getVertexArray());
+		glBindBuffer(GL_ARRAY_BUFFER, model.getBuffer());
+		
+
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
+	    
+		//if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
+		
+			modelViewProjectionMatrix.mul(projectionMatrix, modelViewProjectionMatrix);
+			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+			modelViewProjectionBuffer.flip();
+			glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+	
+			texture = model.getTexture();
+			if (texture != null) {
+				texture.bind();
+				glUniform1i(shader.getTextureUniformLocation(), 0);
+			}
+	
+			glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+		//}
+		
+	    model = getLeft();
+	    
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix.rotY(MathF.PI_OVER_2);
+	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
+	    
+		//if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
+	
+		    modelViewProjectionMatrix.mul(projectionMatrix, modelViewProjectionMatrix);
+	
+			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+			modelViewProjectionBuffer.flip();
+			glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+			
+			texture = model.getTexture();
+			if (texture != null) {
+				texture.bind();
+				glUniform1i(shader.getTextureUniformLocation(), 0);
+			}
+	
+			glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+		//}
+		
+	    model = getBack();
+
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix.rotY(MathF.PI);
+	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
+	    
+		//if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
+	
+		    modelViewProjectionMatrix.mul(projectionMatrix, modelViewProjectionMatrix);
+	
+			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+			modelViewProjectionBuffer.flip();
+			glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+			
+			texture = model.getTexture();
+			if (texture != null) {
+				texture.bind();
+				glUniform1i(shader.getTextureUniformLocation(), 0);
+			}
+			
+			glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+		//}
+		
+	    model = getRight();
+
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix.rotY(-MathF.PI_OVER_2);
+	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
+	    
+		//if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
+	
+		    modelViewProjectionMatrix.mul(projectionMatrix, modelViewProjectionMatrix);
+	
+			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+			modelViewProjectionBuffer.flip();
+			glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+			
+			texture = model.getTexture();
+			if (texture != null) {
+				texture.bind();
+				glUniform1i(shader.getTextureUniformLocation(), 0);
+			}
+	
+			glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+		//}
+		
+	    model = getTop();
+
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,.5f,.5f));
+	    modelViewProjectionMatrix.rotX(-MathF.PI_OVER_2);
+		
+	    //if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
+	
+		    modelViewProjectionMatrix.mul(projectionMatrix, modelViewProjectionMatrix);
+	
+			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+			modelViewProjectionBuffer.flip();
+			glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+			
+			texture = model.getTexture();
+			if (texture != null) {
+				texture.bind();
+				glUniform1i(shader.getTextureUniformLocation(), 0);
+			}
+	
+			glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+	    //}
+	    
+	    model = getBottom();
+	    if (model != null) {
+
+		    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+		    modelViewProjectionMatrix.rotX(MathF.PI_OVER_2);
+		    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
+		    
+			//if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
+	
+			    modelViewProjectionMatrix.mul(projectionMatrix, modelViewProjectionMatrix);
+	
+				modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+				modelViewProjectionBuffer.flip();
+				glUniformMatrix4(shader.getModelViewProjectionMatrixUniformLocation(), false, modelViewProjectionBuffer);
+				
+				texture = model.getTexture();
+				if (texture != null) {
+					texture.bind();
+					glUniform1i(shader.getTextureUniformLocation(), 0);
+				}
+	
+				glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+			//}
+	    }
 	}
 }

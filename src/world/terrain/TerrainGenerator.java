@@ -12,31 +12,21 @@ class TerrainGenerator {
 	
 	private long seed;
 	private ArrayList<TerrainFeature> terrainFeatures = new ArrayList<TerrainFeature>();
-	private World world;
 	
-	public TerrainGenerator(long seed, World world) {
+	public TerrainGenerator(long seed) {
 		this.seed = seed;
-		this.world = world;
 	}
 	
 	public long getSeed() {
 		return seed;
 	}
 	
-	public Chunk generateChunk(Vector3i position) {
-		Chunk chunk = new Chunk(position);
-		
-		for (int i = 0; i < Chunk.CHUNK_SIZE; i++) {
-			for (int j = 0; j < Chunk.CHUNK_SIZE; j++) {
-				
-				WorldObject o = new VisibleObject("cube");
-				o.setPosition(new Vector3f(i + position.x * Chunk.CHUNK_SIZE, 0, j + position.z * Chunk.CHUNK_SIZE));
-				world.addObject(o);
-				Vector3i blockPosition = new Vector3i(i,0,j);
-				chunk.set(o, blockPosition);
-			}
+	public VisibleObject generate(Vector3i position) {
+		VisibleObject o = null;
+		if (position.y == 0) {
+			o = new VisibleObject("cube");
+			o.setPosition(position);
 		}
-		
-		return chunk;
+		return o;
 	}
 }

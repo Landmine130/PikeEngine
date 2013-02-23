@@ -116,7 +116,11 @@ public class Vector3f extends Tuple3f implements Serializable {
       * @param t1 the Tuple3f containing the initialization x y z data
       */
     public Vector3f(Tuple3f t1) {
-	super(t1);
+    	super(t1);
+    }
+    
+    public Vector3f(Tuple3i t1) {
+    	super(t1);
     }
 
     /**
@@ -215,5 +219,9 @@ public class Vector3f extends Tuple3f implements Serializable {
     
     public float innerProduct(Vector3f v) {
     	return x * v.x + y * v.y + z * v.z;
+    }
+    
+    public final Vector3i toVector3i() {
+    	return new Vector3i(this);
     }
 }

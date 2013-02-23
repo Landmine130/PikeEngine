@@ -90,6 +90,10 @@ public class Timer implements Runnable {
 		running = false;
 	}
 	
+	public boolean isRunning() {
+		return running;
+	}
+	
 	public double frequency() {
 		return frequency;
 	}
@@ -154,10 +158,12 @@ public class Timer implements Runnable {
 				}
 			} while (stillWaiting);
 			
-			if (percentComplete() < 100)
+			if (percentComplete() < 100 && running)
 				call();
 		}
-		call();
+		if (running) {
+			call();
+		}
 		running = false;
 		thread = new Thread(this);
 	}

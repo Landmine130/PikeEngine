@@ -2,6 +2,7 @@ package world;
 
 import vecmath.Vector3f;
 import vecmath.Matrix4f;
+import vecmath.Vector3i;
 
 import java.util.LinkedHashSet;
 
@@ -17,29 +18,13 @@ public class WorldObject {
 		orientation = new Vector3f();
 	}
 	
-	public void prepareToUpdate(double timeElapsed) {
-		
-	}
-	
-	public void update() {
-		
-	}
-	
-	public void worldPaused(World w) {
-		
-	}
-	
-	public void worldResumed(World w) {
-		
-	}
-	
 	public void move(Vector3f distance) {
 		
 		Vector3f newPosition = new Vector3f(position);
 		newPosition.add(distance);
 		
 		setPosition(newPosition);
-	}
+		}
 	
 	public Vector3f getPosition() {
 		return new Vector3f(position);
@@ -47,9 +32,20 @@ public class WorldObject {
 	
 	public void setPosition(Vector3f position) {
 		
-		notifyObserversWillMove(position);
+		Vector3f tmp = new Vector3f(position);
+		notifyObserversWillMove(tmp);
 
-		this.position.set(position);
+		this.position.set(tmp);
+		
+		notifyObserversDidMove();
+	}
+	
+	public void setPosition(Vector3i position) {
+		
+		Vector3f tmp = new Vector3f(position);
+		notifyObserversWillMove(tmp);
+
+		this.position.set(tmp);
 		
 		notifyObserversDidMove();
 	}
@@ -59,11 +55,7 @@ public class WorldObject {
 		Vector3f newOrientation = new Vector3f(orientation);
 		newOrientation.add(rotation);
 		
-		notifyObserversWillRotate(newOrientation);
-
-		orientation.set(newOrientation);
-		
-		notifyObserversDidRotate();
+		setOrientation(newOrientation);
 	}
 	
 	public Vector3f getOrientation() {
@@ -72,9 +64,10 @@ public class WorldObject {
 	
 	public void setOrientation(Vector3f orientation) {
 		
-		notifyObserversWillRotate(orientation);
+		Vector3f tmp = new Vector3f(orientation);
+		notifyObserversWillRotate(tmp);
 
-		this.orientation.set(orientation);
+		this.orientation.set(tmp);
 		
 		notifyObserversDidRotate();
 	}

@@ -87,9 +87,15 @@ public abstract class Tuple3i implements Serializable {
       * @param t1 the Tuple3i containing the initialization x y z data
       */
     public Tuple3i(Tuple3i t1) {
-	x = t1.x;
-	y = t1.y;
-	z = t1.z;
+    	x = t1.x;
+		y = t1.y;
+		z = t1.z;
+    }
+    
+    public Tuple3i(Vector3f t1) {
+    	x = (int) t1.x;
+		y = (int) t1.y;
+		z = (int) t1.z;
     }
 
     /**
@@ -172,9 +178,15 @@ public abstract class Tuple3i implements Serializable {
       * @param t is the other tuple
       */
     public final void add(Tuple3i t1) {
-	x += t1.x;
-	y += t1.y;
-	z += t1.z;
+    	x += t1.x;
+		y += t1.y;
+		z += t1.z;
+    }
+    
+    public final void add(int i) {
+    	x += i;
+    	y += i;
+    	z += i;
     }
 
     /**
@@ -290,7 +302,7 @@ public abstract class Tuple3i implements Serializable {
       * @param o1 the object with which the comparison is made.
       */
     public boolean equals(Object o1) {
-	return o1 != null && (o1 instanceof Tuple3i) && equals((Tuple3i)o1);
+	return (o1 instanceof Tuple3i) && equals((Tuple3i)o1);
     }
 
 
