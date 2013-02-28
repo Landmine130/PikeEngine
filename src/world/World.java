@@ -1,10 +1,13 @@
 package world;
 
 import misc.Timer;
+import misc.Benchmark;
 import misc.InputHandler;
 import misc.MathF;
 import java.nio.FloatBuffer;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -29,7 +32,7 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.*;
 
-public class World implements WorldObjectMovementObserver {
+public class World {
 	
 	private ViewPoint viewPoint;
 	
@@ -59,6 +62,15 @@ public class World implements WorldObjectMovementObserver {
 	private volatile Terrain terrain;
 
 	private volatile double fps;
+	
+	private BackgroundUpdater[] updaters;
+	private BackgroundDrawPreparer[] drawPreparers;
+	private Timer processorCheckTimer = new Timer(5d, -1d, this, "updateProcessorCount");
+	private Benchmark benchmark = new Benchmark();
+	private Drawable lastDrawn = null;
+	
+	LinkedHashSet<Drawable> tempDrawableObjects = new LinkedHashSet<Drawable>();
+	LinkedHashSet<WorldUpdateObserver> tempObservers = new LinkedHashSet<WorldUpdateObserver>();
 
 	public World(long seed) {
 		
@@ -82,6 +94,20 @@ public class World implements WorldObjectMovementObserver {
 			return;
 		}
 		
+		updaters = new BackgroundUpdater[Runtime.getRuntime().availableProcessors()];
+		
+		for (int i = 0; i < updaters.length; i++) {
+			updaters[i] = new BackgroundUpdater(this);
+		}
+		
+		drawPreparers = new BackgroundDrawPreparer[Runtime.getRuntime().availableProcessors()];
+		
+		for (int i = 0; i < drawPreparers.length; i++) {
+			drawPreparers[i] = new BackgroundDrawPreparer(this);
+		}
+		
+		processorCheckTimer.start();
+		
 		viewPoint = new ViewPoint();
 		
 		glEnable(GL_CULL_FACE);
@@ -94,6 +120,9 @@ public class World implements WorldObjectMovementObserver {
 	    glEnable(GL_DEPTH_TEST);
 	    glDepthMask(true);
 	    glDepthFunc(GL_LEQUAL);
+	    
+		glActiveTexture(GL_TEXTURE0);
+
 	    
 		terrain = new Terrain(seed);
 	}
@@ -177,7 +206,17 @@ public class World implements WorldObjectMovementObserver {
 	}
 	
 	private void tearDownGL() {
-		
+		processorCheckTimer.stop();
+		synchronized (updaters) {
+			for (int i = 0; i < updaters.length; i++) {
+				updaters[i].stop();
+			}
+		}
+		synchronized (drawPreparers) {
+			for (int i = 0; i < drawPreparers.length; i++) {
+				drawPreparers[i].stop();
+			}
+		}
 		soundManager.destroy();
 		Display.destroy();
 	}
@@ -206,7 +245,6 @@ public class World implements WorldObjectMovementObserver {
 				wasPaused = true;
 			}
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 			if (skybox != null) {
 				glDepthRange(0f, .99f);
 				drawFrame();
@@ -217,7 +255,7 @@ public class World implements WorldObjectMovementObserver {
 				drawFrame();
 			}
 			Display.update();
-			Display.sync(targetFPS);
+			//Display.sync(targetFPS);
 			double currentTime = Timer.getTime();
 			fps = (1 / (currentTime - fpsTime) + fps) / 2;
 			fpsTime = currentTime;
@@ -231,78 +269,218 @@ public class World implements WorldObjectMovementObserver {
 	}
 	
 	private void drawSkybox() {
-		skybox.drawInWorld(this);
-}
-
-	
-	private void drawFrame() {
-		
-		LinkedHashSet<Drawable> set;
-		synchronized (drawableObjects) {
-			set = new LinkedHashSet<Drawable>(drawableObjects);
+		skybox.prepareToDrawInWorld(this);
+		if (skybox.needsDrawn()) {
+			skybox.drawInWorld(this, lastDrawn);
+			lastDrawn = skybox;
 		}
-		for (Drawable o : set) {
-			o.drawInWorld(this);
+	}
+	
+	public void updateProcessorCount() {
+		int processorCount = Runtime.getRuntime().availableProcessors();
+		
+		if (processorCount != updaters.length) {
+			BackgroundUpdater[] updaterTemp = new BackgroundUpdater[processorCount];
+			
+			for (int i = 0; i < updaterTemp.length; i++) {
+				if (i < updaters.length) {
+					updaterTemp[i] = updaters[i];
+				}
+				else {
+					updaterTemp[i] = new BackgroundUpdater(this);
+				}
+			}
+			
+			synchronized (updaters) {
+				
+				for (int i = updaterTemp.length; i < updaters.length; i++) {
+					updaters[i].stop();
+				}
+				
+				updaters = updaterTemp;
+			}
+			
+			BackgroundDrawPreparer[] preparerTemp;
+			if (processorCount == 1) {
+				preparerTemp = new BackgroundDrawPreparer[1];
+			}
+			else {
+				preparerTemp = new BackgroundDrawPreparer[processorCount - 1];
+			}
+			
+			
+			for (int i = 0; i < preparerTemp.length; i++) {
+				if (i < drawPreparers.length) {
+					preparerTemp[i] = drawPreparers[i];
+				}
+				else {
+					preparerTemp[i] = new BackgroundDrawPreparer(this);
+				}
+			}
+			
+			synchronized (drawPreparers) {
+				
+				for (int i = preparerTemp.length; i < drawPreparers.length; i++) {
+					drawPreparers[i].stop();
+				}
+				
+				drawPreparers = preparerTemp;
+			}
+		}
+	}
+	
+	private LinkedList<Drawable> preparedDrawables = new LinkedList<Drawable>();
+	
+	public void addPreparedDrawable(Drawable d) {
+		synchronized (preparedDrawables) {
+			preparedDrawables.add(d);
+			preparedDrawables.notifyAll();
+		}
+	}
+
+	LinkedList<Drawable> tempPreparedDrawables = new LinkedList<Drawable>();
+
+	private void drawFrame() {
+
+		synchronized (drawableObjects) {
+			tempDrawableObjects.addAll(drawableObjects);
+		}
+		Iterator<Drawable> iterator = tempDrawableObjects.iterator(); 
+		
+		synchronized (drawPreparers) {
+			
+			int objectsPerUpdater = tempDrawableObjects.size() / drawPreparers.length + 1;
+			int remaining = tempDrawableObjects.size();
+
+			for (int i = 0; i < drawPreparers.length; i++) {
+								
+				for (int j = 0; j < objectsPerUpdater && iterator.hasNext(); j++) {
+					
+					drawPreparers[i].add(iterator.next());
+					iterator.remove();
+				}
+			}
+
+			Drawable d;
+			
+			while (remaining > 0) {
+				try {
+					synchronized (preparedDrawables) {
+						if (preparedDrawables.size() == 0) {
+							preparedDrawables.wait(100);
+						}
+						tempPreparedDrawables.addAll(preparedDrawables);
+						preparedDrawables.clear();
+					}
+				}
+				catch (InterruptedException e) {
+					
+				}
+
+				while (tempPreparedDrawables.size() > 0) {
+					d = tempPreparedDrawables.removeFirst();
+					if (d.needsDrawn()) {
+						d.drawInWorld(this, lastDrawn);
+						lastDrawn = d;
+					}
+					remaining--;
+				}
+			}
 		}
 	}
 	
 	private void notifyObserversOfUpdate() {
 		
-		LinkedHashSet<WorldUpdateObserver> set;
 		synchronized (observers) {
-			set = new LinkedHashSet<WorldUpdateObserver>(observers);
+			tempObservers.addAll(observers);
 		}
-		float timeElapsed = (float)(Timer.getTime() - timeSinceLastUpdate);
-		for (WorldUpdateObserver o : set) {
-			o.worldUpdated(this, timeElapsed);
+		Iterator<WorldUpdateObserver> iterator = tempObservers.iterator();
+		
+		synchronized (updaters) {
+			
+			int objectsPerUpdater = tempObservers.size() / updaters.length + 1;
+
+			float timeElapsed = (float)(Timer.getTime() - timeSinceLastUpdate);
+			
+			for (int i = 0; i < updaters.length; i++) {
+				
+				updaters[i].setTime(timeElapsed);
+				
+				for (int j = 0; j < objectsPerUpdater && iterator.hasNext(); j++) {
+
+					updaters[i].add(iterator.next());
+					iterator.remove();
+				}
+			}
+			
+			boolean updatersUpdating = false;
+			synchronized (this) {
+				for (int i = 0; i < updaters.length; i++) {
+					updatersUpdating = updatersUpdating || updaters[i].size() > 0;
+				}
+				while (updatersUpdating) {
+					try {
+						wait(100);
+					}
+					catch (InterruptedException e) {
+						
+					}
+					
+					updatersUpdating = false;
+					
+					for (int i = 0; i < updaters.length; i++) {
+						updatersUpdating = updatersUpdating || updaters[i].size() > 0;
+					}
+				}
+			}
 		}
 	}
 	
 	private void notifyObserversOfStart() {
 		
-		LinkedHashSet<WorldUpdateObserver> set;
 		synchronized (observers) {
-			set = new LinkedHashSet<WorldUpdateObserver>(observers);
+			tempObservers.addAll(observers);
 		}
 		
-		for (WorldUpdateObserver o : set) {
+		for (WorldUpdateObserver o : tempObservers) {
 			o.worldStarted(this);
 		}
+		tempObservers.clear();
 	}
 	
 	private void notifyObserversOfClose() {
 		
-		LinkedHashSet<WorldUpdateObserver> set;
 		synchronized (observers) {
-			set = new LinkedHashSet<WorldUpdateObserver>(observers);
+			tempObservers.addAll(observers);
 		}
 		
-		for (WorldUpdateObserver o : set) {
+		for (WorldUpdateObserver o : tempObservers) {
 			o.worldClosed(this);
 		}
+		tempObservers.clear();
 	}
 	
 	private void notifyObserversOfPause() {
 		
-		LinkedHashSet<WorldUpdateObserver> set;
 		synchronized (observers) {
-			set = new LinkedHashSet<WorldUpdateObserver>(observers);
+			tempObservers.addAll(observers);
 		}
 		
-		for (WorldUpdateObserver o : set) {
+		for (WorldUpdateObserver o : tempObservers) {
 			o.worldPaused(this);
 		}
+		tempObservers.clear();
 	}
 	
 	private void notifyObserversOfResume() {
-		LinkedHashSet<WorldUpdateObserver> set;
 		synchronized (observers) {
-			set = new LinkedHashSet<WorldUpdateObserver>(observers);
+			tempObservers.addAll(observers);
 		}
 		
-		for (WorldUpdateObserver o : set) {
+		for (WorldUpdateObserver o : tempObservers) {
 			o.worldResumed(this);
 		}
+		tempObservers.clear();
 	}
 	
 	public double getFPS() {
@@ -317,26 +495,283 @@ public class World implements WorldObjectMovementObserver {
 
 		this.viewPoint = viewPoint;
 	}
-
-
-	public void worldObjectWillMove(WorldObject o, Vector3f newPosition) {
-		
-	}
-
-	public void worldObjectDidMove(WorldObject o) {
-		
-	}
-
-	public void worldObjectWillRotate(WorldObject o, Vector3f newOrientation) {
-		
-	}
-
-	public void worldObjectDidRotate(WorldObject o) {
-		
-	}
 	
 	public Terrain getTerrain() {
 		return terrain;
+	}
+}
+
+
+
+
+class BackgroundUpdater implements Runnable {
+
+	private LinkedList<WorldUpdateObserver> objects = new LinkedList<WorldUpdateObserver>();
+	
+	private final Thread thread = new Thread(this);
+	private World world;
+	private volatile float time = 0;
+	private boolean paused = false;
+	private boolean running = true;
+	
+	public BackgroundUpdater(World w) {
+		world = w;
+		thread.setName("Updater " + thread.getName());
+		thread.start();
+	}
+	
+	public void add(WorldUpdateObserver o) {
+		synchronized (objects) {
+			objects.add(o);
+			objects.notifyAll();
+		}
+	}
+	
+	public void setTime(float time) {
+		this.time = time;
+	}
+	
+	private LinkedList<WorldUpdateObserver> list = new LinkedList<WorldUpdateObserver>();
+	
+	public void run() {
+		
+		synchronized (objects) {
+			list.addAll(objects);
+		}
+		
+		 while (list.size() == 0) {
+			try {
+				synchronized (objects) {
+					objects.wait(100);
+				}
+			}
+			catch (InterruptedException e) {
+				
+			}
+			if (!running) {
+				break;
+			}
+			synchronized (objects) {
+				list.addAll(objects);
+				objects.clear();
+			}
+		}
+		
+		mainLoop:
+		while (running) {
+
+			while (list.size() > 0) {
+							
+				while (paused) {
+					try {
+						synchronized (this) {
+							wait(100);
+						}
+					}
+					catch (InterruptedException e) {
+						
+					}
+				}
+				list.removeFirst().worldUpdated(world, time);
+			}
+			
+			if (!running) {
+				break mainLoop;
+			}
+			
+			synchronized (objects) {
+				list.addAll(objects);
+				objects.clear();
+			}
+			if (list.size() == 0) {
+				synchronized (world) {
+					world.notifyAll();
+				}
+				do {
+					try {
+						synchronized (objects) {
+							objects.wait(100);
+						}
+					}
+					catch (InterruptedException e) {
+						
+					}
+					if (!running) {
+						break mainLoop;
+					}
+					synchronized (objects) {
+						list.addAll(objects);
+						objects.clear();
+					}
+				} while (list.size() == 0);
+			}
+		}
+	}
+	
+	public boolean isPuased() {
+		return paused;
+	}
+	
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+		if (!paused) {
+			synchronized (this) {
+				notifyAll();
+			}
+		}
+	}
+	
+	public int size() {
+		synchronized (objects) {
+			return objects.size();
+		}
+	}
+	
+	/**
+	 * Permanently stops this object from drawing.
+	 */
+	public void stop() {
+		running = false;
+		paused = false;
+		synchronized (objects) {
+			objects.notifyAll();
+		}
+		synchronized (this) {
+			notifyAll();
+		}
+	}
+}
+
+class BackgroundDrawPreparer implements Runnable {
+
+	private LinkedList<Drawable> objects = new LinkedList<Drawable>();
+	private final Thread thread = new Thread(this);
+	private World world;
+	private boolean paused = false;
+	private boolean running = true;
+	
+	public BackgroundDrawPreparer(World w) {
+		world = w;
+		thread.setName("DrawPreparer " + thread.getName());
+		thread.start();
+	}
+	
+	public void add(Drawable o) {
+		synchronized (objects) {
+			objects.add(o);
+			objects.notifyAll();
+		}
+	}
+	
+	private LinkedList<Drawable> list = new LinkedList<Drawable>();
+	
+	public void run() {
+		
+		synchronized (objects) {
+			list.addAll(objects);
+		}
+		
+		 while (list.size() == 0) {
+			try {
+				synchronized (objects) {
+					objects.wait(100);
+				}
+			}
+			catch (InterruptedException e) {
+				
+			}
+			if (!running) {
+				break;
+			}
+			synchronized (objects) {
+				list.addAll(objects);
+				objects.clear();
+			}
+		}
+		
+		 Benchmark bench = new Benchmark();
+		
+		mainLoop:
+		while (running) {
+
+			while (list.size() > 0) {
+							
+				while (paused) {
+					try {
+						synchronized (this) {
+							wait(100);
+						}
+					}
+					catch (InterruptedException e) {
+						
+					}
+				}
+				Drawable d = list.removeFirst();
+				d.prepareToDrawInWorld(world);
+				world.addPreparedDrawable(d);
+			}
+			
+			if (!running) {
+				break mainLoop;
+			}
+			
+			synchronized (objects) {
+				list.addAll(objects);
+				objects.clear();
+			}
+			while (list.size() == 0) {
+				try {
+					synchronized (objects) {
+						//bench.startTimer();
+						objects.wait(100);
+						//bench.printTimeElapsed();
+					}
+				}
+				catch (InterruptedException e) {
+					
+				}
+				if (!running) {
+					break mainLoop;
+				}
+				synchronized (objects) {
+					list.addAll(objects);
+					objects.clear();
+				}
+			}
+		}
+	}
+	
+	public boolean isPuased() {
+		return paused;
+	}
+	
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+		if (!paused) {
+			synchronized (this) {
+				notifyAll();
+			}
+		}
+	}
+	
+	public int size() {
+		synchronized (objects) {
+			return objects.size();
+		}
+	}
+	
+	/**
+	 * Permanently stops this object from drawing.
+	 */
+	public void stop() {
+		running = false;
+		paused = false;
+		synchronized (objects) {
+			objects.notifyAll();
+		}
+		synchronized (this) {
+			notifyAll();
+		}
 	}
 }
 

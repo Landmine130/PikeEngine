@@ -39,7 +39,6 @@ public class Main implements InputObserver {
 		
 		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint(), world);
 		player.setPosition(new Vector3f(0f,1.5f,0f));
-		world.addDrawable(player);
 		
 		//o = new VisibleObject("cube");
 		//o.setPosition(new Vector3f(1f,0,30f));
