@@ -11,6 +11,11 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+
 
 public class SkyboxModel extends Model {
 	
@@ -27,8 +32,7 @@ public class SkyboxModel extends Model {
 										0f,0f,0f,
 										1f,1f};
 	private static int vertexCount = 6;
-	private static int normalCount = 0;
-	private static int textureCoordinateCount = 6;
+
 	private static SkyboxModel square = new SkyboxModel((Texture) null);
 
 	
@@ -38,8 +42,16 @@ public class SkyboxModel extends Model {
 		return m;
 	}
 	
+	private static ByteBuffer encode (float floatArray[]) { 
+
+		ByteBuffer byteBuffer = BufferUtils.createByteBuffer(floatArray.length * 4); 
+		FloatBuffer floatBuffer = byteBuffer.asFloatBuffer(); 
+		floatBuffer.put(floatArray); 
+		return byteBuffer; 
+		} 
+	
 	public SkyboxModel(Texture t) {
-		super(squareData, t, vertexCount, normalCount, textureCoordinateCount);
+		super(encode(squareData), t, vertexCount);
 		
 	}
 	

@@ -5,11 +5,11 @@ import vecmath.Vector3f;
 
 public class Character extends VisibleObject implements WorldUpdateObserver {
 	
-	private float xSpeed;
-	private float zSpeed;
-	private float speed;
-	private float direction;
-	private World world;
+	private volatile float xSpeed;
+	private volatile float zSpeed;
+	private volatile float speed;
+	private volatile float direction;
+	private volatile World world;
 		
 	public Character(String modelName, World world) {
 		super(modelName);
@@ -99,7 +99,7 @@ public class Character extends VisibleObject implements WorldUpdateObserver {
 	}
 	
 	public void worldUpdated(World w, float timeElapsed) {
-		move(new Vector3f((float)(timeElapsed * xSpeed), 0 , (float)(timeElapsed * zSpeed)));
+		move(new Vector3f(timeElapsed * xSpeed, 0, timeElapsed * zSpeed));
 	}
 
 	public void worldStarted(World w) {

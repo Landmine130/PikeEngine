@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.FloatBuffer;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
@@ -22,17 +22,15 @@ public class Model {
     private static HashMap<String, Model> loadedModels = new HashMap<String, Model>();
 	
 	public static final String MODELDATA_PATH = "Resources/Models/";
-	
-	protected FloatBuffer data;
+	public static final String MODELDATA_PATH_EXTENSION = ".modeldata";
+	protected ByteBuffer data;
 
 	protected int vertexCount;
-	protected int normalCount;
-	protected int textureCoordinateCount;
 
 	protected int vertexArray;
 	protected int buffer;
 		
-	protected Texture texture;
+	protected volatile Texture texture;
 	
 	protected float radius = -1;
 	
@@ -51,14 +49,16 @@ public class Model {
 	
 	public static void unloadModel(String name) {
 		name = MODELDATA_PATH + name;
-		if (loadedModels.remove(name) != null) {
-			System.gc();
-		}
+		loadedModels.remove(name);
+	}
+	
+	protected static String getExtension() {
+		return ".modeldata";
 	}
 	
 	public Model(String path, boolean textured) {
 		try {
-			loadModelDataForName(path + ".modeldata");
+			loadModelDataForName(path + getExtension());
 		} 
 		catch(FileNotFoundException e) {
 		     System.err.println("Error: Model file not found");
@@ -78,12 +78,10 @@ public class Model {
 		init();
 	}
 	
-	public Model(FloatBuffer data, Texture texture, int vertexCount, int normalCount, int textureCoordinateCount) {
+	public Model(ByteBuffer data, Texture texture, int vertexCount) {
 		this.data = data;
 		this.texture = texture;
 		this.vertexCount = vertexCount;
-		this.normalCount = normalCount;
-		this.textureCoordinateCount = textureCoordinateCount;
 		init();
 	}
 	
@@ -92,20 +90,16 @@ public class Model {
 		this.data = m.data;
 		this.vertexArray = m.vertexArray;
 		this.vertexCount = m.vertexCount;
-		this.normalCount = m.normalCount;
-		this.textureCoordinateCount = m.textureCoordinateCount;
 		this.texture = m.texture;
 		this.radius = m.radius;
 	}
 	
-	public Model(float[] data, Texture texture, int vertexCount, int normalCount, int textureCoordinateCount) {
-		this.data = BufferUtils.createFloatBuffer(data.length);
+	public Model(byte[] data, Texture texture, int vertexCount) {
+		this.data = BufferUtils.createByteBuffer(data.length);
 		this.data.put(data);
 		this.data.flip();
 		this.texture = texture;
 		this.vertexCount = vertexCount;
-		this.normalCount = normalCount;
-		this.textureCoordinateCount = textureCoordinateCount;
 		init();
 	}
 	
@@ -139,7 +133,7 @@ public class Model {
 		return vertexArray;
 	}
 
-	public int getBuffer() {
+	public int getArrayBuffer() {
 		return buffer;
 	}
 
@@ -150,26 +144,28 @@ public class Model {
 	public void setTexture(Texture texture) {
 		this.texture = texture;
 	}
-
+	
 	private static final int FLOAT_BYTE_COUNT = Float.SIZE / Byte.SIZE;
-	private static final int HEADER_SIZE = 3;
+	private static final int HEADER_SIZE = 3 * FLOAT_BYTE_COUNT;
 	
 	protected void loadModelDataForName(String name) throws FileNotFoundException, IOException {
 		File file = new File(name);
-		int dataSize = (int)(file.length() / FLOAT_BYTE_COUNT) - HEADER_SIZE;
+		int dataSize = (int)file.length() - HEADER_SIZE;
+		int floatDataSize = dataSize / FLOAT_BYTE_COUNT;
 		
 		DataInputStream reader = new DataInputStream(new FileInputStream(file));
 		
 		vertexCount = reader.readInt();
-		normalCount = reader.readInt();
-		textureCoordinateCount = reader.readInt();
+		reader.readInt();
+		reader.readInt();
 		
-		data = BufferUtils.createFloatBuffer(dataSize);
-
-		for (int i = 0; i < dataSize; i++) {
-			data.put(reader.readFloat());
+		data = BufferUtils.createByteBuffer(dataSize);
+		
+		for (int i = 0; i < floatDataSize; i++) {
+			data.putFloat(reader.readFloat());
 		}
 		data.flip();
+		reader.close();
 	}
 	
 	private float calculateRadius() {
@@ -188,19 +184,11 @@ public class Model {
 		return max;
 	}
 
-	public int getTextureCoordinateCount() {
-		return textureCoordinateCount;
-	}
-
 	public int getVertexCount() {
 		return vertexCount;
 	}
-
-	public int getNormalCount() {
-		return normalCount;
-	}
 	
-	public FloatBuffer getData() {
+	public ByteBuffer getData() {
 		return data;
 	}
 	

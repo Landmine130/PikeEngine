@@ -20,22 +20,31 @@ public class WorldObject {
 	
 	public void move(Vector3f distance) {
 		
-		Vector3f newPosition = new Vector3f(position);
-		newPosition.add(distance);
+		Vector3f newPosition = new Vector3f(distance);
+		
+		synchronized (position) {
+			newPosition.add(position);
+		}
 		
 		setPosition(newPosition);
-		}
+	}
 	
 	public Vector3f getPosition() {
-		return new Vector3f(position);
+		Vector3f ret = new Vector3f();
+		synchronized (position) {
+			ret.set(position);
+		}
+		return ret;
 	}
 	
 	public void setPosition(Vector3f position) {
 		
 		Vector3f tmp = new Vector3f(position);
 		notifyObserversWillMove(tmp);
-
-		this.position.set(tmp);
+		
+		synchronized (this.position) {
+			this.position.set(tmp);
+		}
 		
 		notifyObserversDidMove();
 	}
@@ -44,70 +53,127 @@ public class WorldObject {
 		
 		Vector3f tmp = new Vector3f(position);
 		notifyObserversWillMove(tmp);
-
-		this.position.set(tmp);
+		
+		synchronized (this.position) {
+			this.position.set(tmp);
+		}
 		
 		notifyObserversDidMove();
 	}
 	
 	public void rotate(Vector3f rotation) {
 
-		Vector3f newOrientation = new Vector3f(orientation);
-		newOrientation.add(rotation);
+		Vector3f newOrientation = new Vector3f(rotation);
+		
+		synchronized (orientation) {
+			newOrientation.add(orientation);
+		}
 		
 		setOrientation(newOrientation);
 	}
 	
 	public Vector3f getOrientation() {
-		return new Vector3f(orientation);
+		Vector3f ret = new Vector3f();
+		synchronized (orientation) {
+			ret.set(orientation);
+		}
+		return ret;
 	}
 	
 	public void setOrientation(Vector3f orientation) {
 		
 		Vector3f tmp = new Vector3f(orientation);
 		notifyObserversWillRotate(tmp);
-
-		this.orientation.set(tmp);
+		
+		synchronized (this.orientation) {
+			this.orientation.set(tmp);
+		}
 		
 		notifyObserversDidRotate();
 	}
 	
 	public void addMovementObserver(WorldObjectMovementObserver o) {
-		observers.add(o);
+		synchronized (observers) {
+			observers.add(o);
+		}
 	}
 	
 	public void removeMovementObserver(WorldObjectMovementObserver o) {
-		observers.remove(o);
+		synchronized (observers) {
+			observers.remove(o);
+		}
 	}
 	
 	private void notifyObserversWillMove(Vector3f newPosition) {
-		for (WorldObjectMovementObserver o : observers) {
+		
+		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
+		synchronized (observers) {
+			temp.addAll(observers);
+		}
+		
+		for (WorldObjectMovementObserver o : temp) {
 			o.worldObjectWillMove(this, newPosition);
 		}
 	}
 	
 	private void notifyObserversDidMove() {
-		for (WorldObjectMovementObserver o : observers) {
+		
+		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
+		synchronized (observers) {
+			temp.addAll(observers);
+		}
+		
+		for (WorldObjectMovementObserver o : temp) {
 			o.worldObjectDidMove(this);
 		}
 	}
 	
 	private void notifyObserversWillRotate(Vector3f newOrientation) {
-		for (WorldObjectMovementObserver o : observers) {
+		
+		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
+		synchronized (observers) {
+			temp.addAll(observers);
+		}
+		
+		for (WorldObjectMovementObserver o : temp) {
 			o.worldObjectWillRotate(this, newOrientation);
 		}
 	}
-	
+		
 	private void notifyObserversDidRotate() {
-		for (WorldObjectMovementObserver o : observers) {
+		
+		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
+		synchronized (observers) {
+			temp.addAll(observers);
+		}
+		
+		for (WorldObjectMovementObserver o : temp) {
 			o.worldObjectDidRotate(this);
 		}
 	}
+	
 	public Matrix4f getTransformationMatrix() {
-		Matrix4f transformation = new Matrix4f(position);
-		transformation.rotX(orientation.x);
-		transformation.rotY(orientation.y);
-		transformation.rotZ(orientation.z);
+		
+		Matrix4f transformation = new Matrix4f();
+		
+		synchronized (position) {
+			transformation.set(position);
+		}
+		
+		float ox;
+		float oy;
+		float oz;
+		
+		synchronized (orientation) {
+			ox = orientation.x;
+			oy = orientation.y;
+			oz = orientation.z;
+		}
+		
+		transformation.rotX(ox);
+		transformation.rotY(oy);
+		transformation.rotZ(oz);
+		
 		return transformation;
 	}
 }

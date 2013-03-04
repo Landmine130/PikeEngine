@@ -122,7 +122,7 @@ public class Skybox implements Drawable {
 		model = getFront();
 		
 		glBindVertexArray(model.getVertexArray());
-		glBindBuffer(GL_ARRAY_BUFFER, model.getBuffer());
+		glBindBuffer(GL_ARRAY_BUFFER, model.getArrayBuffer());
 		
 
 	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
@@ -270,7 +270,7 @@ public class Skybox implements Drawable {
 		switch (type) {
 		
 		case arrayBuffer:
-			return id == getTop().getBuffer();
+			return id == getTop().getArrayBuffer();
 		case shader:
 			return id == shader.getProgram();
 		case texture:

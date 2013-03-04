@@ -8,15 +8,16 @@ import vecmath.Vector3f;
 
 public class ViewPoint extends WorldObject {
 
-	private float fieldOfView;
-	private float nearViewDistance;
-	private float farViewDistance;
-	private Matrix4f projectionMatrix;
+	private volatile float fieldOfView;
+	private volatile float nearViewDistance;
+	private volatile float farViewDistance;
+	private volatile Matrix4f projectionMatrix;
 	
 	public ViewPoint() {
 		nearViewDistance = .1f;
 		farViewDistance = 100.0f;
-		setFieldOfView(MathF.toRadians(65f));
+		fieldOfView = MathF.toRadians(65f);
+		updatePerspectiveMatrix();
 	}
 	
 	public float getFieldOfView() {
@@ -60,32 +61,41 @@ public class ViewPoint extends WorldObject {
 	public Matrix4f getTransformationMatrix() {
 		
 		Matrix4f transformation = new Matrix4f();
-		transformation.rotX(-orientation.x);
-		transformation.rotY(-orientation.y);
-		transformation.rotZ(-orientation.z);
-		Vector3f negativePosition = new Vector3f(position);
+		
+		float ox;
+		float oy;
+		float oz;
+		
+		synchronized (orientation) {
+			ox = orientation.x;
+			oy = orientation.y;
+			oz = orientation.z;
+		}
+		
+		transformation.rotX(-ox);
+		transformation.rotY(-oy);
+		transformation.rotZ(-oz);
+		
+		Vector3f negativePosition = new Vector3f();
+		
+		synchronized (negativePosition) {
+			negativePosition.set(position);
+		}
 		negativePosition.negate();
+		
 		transformation.translate(negativePosition);
+		
 		return transformation;
 	}
 	
 	public Matrix4f getProjectionMatrix() {
-		return projectionMatrix;
+		return new Matrix4f(projectionMatrix);
 	}
 	
-	private float tang;
-	private float sphereFactorX;
-	private float sphereFactorY;
-	
-	public void setPosition(Vector3f position) {
-		super.setPosition(position);
-	}
-	
-	public void setOrientation(Vector3f orientation) {
-		super.setOrientation(orientation);
-	}
-
-	private float aspectRatio;
+	private volatile float tang;
+	private volatile float sphereFactorX;
+	private volatile float sphereFactorY;
+	private volatile float aspectRatio;
 	
 	private void CreateLeftHandedPerspective(float fov, float aspect, float zNear, float zFar) {
 		aspectRatio = aspect;
@@ -94,9 +104,8 @@ public class ViewPoint extends WorldObject {
 	    float f = 1.0f / tang;
 		projectionMatrix = new Matrix4f(f / aspect,	0,0, 0,
 							0, f, 0, 0,
-							0, 0, (zFar + zNear) / (zFar - zNear), (-2 * zFar * zNear) / (zFar - zNear),
-							0, 0, 1, 0);
-		projectionMatrix.transpose();
+							0, 0, (zFar + zNear) / (zFar - zNear), 1,
+							0, 0, (-2 * zFar * zNear) / (zFar - zNear), 0);
 		
 		// compute width and height of the near and far plane sections
 		sphereFactorY = 1/MathF.cos(fov);

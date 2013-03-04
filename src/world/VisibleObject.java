@@ -11,15 +11,14 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import vecmath.Matrix3f;
 import vecmath.Matrix4f;
-import world.Drawable.idType;
 
 
 public class VisibleObject extends WorldObject implements Drawable {
 
-	private Shader shader;
-	private Model model;
+	private volatile Shader shader;
+	private volatile Model model;
 	
-	private float opacity;
+	private volatile float opacity;
 	
 	public VisibleObject(String modelName) {
 		this.shader = Shader.shader;
@@ -106,7 +105,7 @@ public class VisibleObject extends WorldObject implements Drawable {
 							
 		int shaderProgram = shader.getProgram();
 		int vertexArray = model.getVertexArray();
-		int arrayBuffer = model.getBuffer();
+		int arrayBuffer = model.getArrayBuffer();
 		
 		if (lastDrawn == null || !lastDrawn.isLastBound(shaderProgram, idType.shader)) {
 			glUseProgram(shaderProgram);
@@ -119,8 +118,9 @@ public class VisibleObject extends WorldObject implements Drawable {
 		if (texture != null) {
 			if (lastDrawn == null || !lastDrawn.isLastBound(texture.getID(), idType.texture)) {
 				texture.bind();
-			}
+			
 			glUniform1i(shader.getTextureUniformLocation(), 0);
+			}
 		}
 
 		if (lastDrawn == null || !lastDrawn.isLastBound(vertexArray, idType.vertexArray)) {
@@ -128,7 +128,7 @@ public class VisibleObject extends WorldObject implements Drawable {
 		}
 					
 		if (lastDrawn == null || !lastDrawn.isLastBound(arrayBuffer, idType.arrayBuffer)) {
-			glBindBuffer(GL_ARRAY_BUFFER, model.getBuffer());
+			glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
 		}
 		
 		glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
@@ -138,7 +138,7 @@ public class VisibleObject extends WorldObject implements Drawable {
 		switch (type) {
 		
 		case arrayBuffer:
-			return id == model.getBuffer();
+			return id == model.getArrayBuffer();
 		case shader:
 			return id == shader.getProgram();
 		case texture:

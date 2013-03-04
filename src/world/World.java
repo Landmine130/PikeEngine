@@ -33,9 +33,7 @@ import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.*;
 
 public class World {
-	
-	private ViewPoint viewPoint;
-	
+		
 	private final int GL_MAJOR_VERSION = 3;
 	private final int GL_MINOR_VERSION = 2;
 	
@@ -60,6 +58,7 @@ public class World {
 	
 	private volatile Drawable skybox;
 	private volatile Terrain terrain;
+	private volatile ViewPoint viewPoint;
 
 	private volatile double fps;
 	
@@ -255,7 +254,7 @@ public class World {
 				drawFrame();
 			}
 			Display.update();
-			//Display.sync(targetFPS);
+			Display.sync(targetFPS);
 			double currentTime = Timer.getTime();
 			fps = (1 / (currentTime - fpsTime) + fps) / 2;
 			fpsTime = currentTime;
