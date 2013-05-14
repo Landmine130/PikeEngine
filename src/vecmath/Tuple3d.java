@@ -85,9 +85,15 @@ public abstract class Tuple3d implements Serializable {
       * @param z the z coordinate
       */
     public Tuple3d(double x, double y, double z) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+    }
+    
+    public Tuple3d(Tuple3i t1) {
+    	x = t1.x;
+    	y = t1.y;
+    	z = t1.z;
     }
 
     /**

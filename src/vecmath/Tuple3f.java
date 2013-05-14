@@ -17,6 +17,7 @@
 package vecmath;
 
 import java.io.Serializable;
+import java.nio.FloatBuffer;
 
 /**
   * A generic 3 element tuple that is represented by
@@ -127,9 +128,9 @@ public abstract class Tuple3f implements Serializable {
     }
     
     public Tuple3f(Tuple3i t1) {
-    	x = (float)t1.x;
-    	y = (float)t1.y;
-    	z = (float)t1.z;
+    	x = t1.x;
+    	y = t1.y;
+    	z = t1.z;
     }
 
     /**
@@ -470,9 +471,9 @@ public abstract class Tuple3f implements Serializable {
       * @param t2 the second tuple
       * @param alpha the alpha interpolation parameter
       */
-    public final void interpolate(Tuple3f t1, Tuple3f t2, float alpha) {
+    public final void lerp(Tuple3f t1, Tuple3f t2, float alpha) {
 	set(t1);
-	interpolate(t2, alpha);
+	lerp(t2, alpha);
     }
 
 
@@ -483,10 +484,16 @@ public abstract class Tuple3f implements Serializable {
       * @param alpha the alpha interpolation parameter
       *
       */
-    public final void interpolate(Tuple3f t1, float alpha) {
+    public final void lerp(Tuple3f t1, float alpha) {
 	float beta = 1 - alpha;
 	x = beta*x + alpha*t1.x;
 	y = beta*y + alpha*t1.y;
 	z = beta*z + alpha*t1.z;
+    }
+    
+    public void store(FloatBuffer fb) {
+    	fb.put(x);
+    	fb.put(y);
+    	fb.put(z);
     }
 }

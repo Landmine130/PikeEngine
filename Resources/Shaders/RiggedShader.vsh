@@ -11,12 +11,13 @@
 
 uniform lowp mat4 modelViewProjectionMatrix;
 uniform lowp mat3 normalMatrix;
-uniform mat4 joints[64];
+uniform lowp mat4 joints[64];
 
 in vec4 weight1;
 in vec4 weight2;
 in vec4 weight3;
 in vec4 weight4;
+
 in ivec4 jointIndexes;
 in vec4 biases;
 
@@ -28,16 +29,17 @@ out mediump vec2 textureCoordinatePass;
 
 void main()
 {
-	vec3 animatedNormal = normalize(bones[boneIndexes.x] * bindNormal + bones[boneIndexes.y] * bindNormal + bones[boneIndexes.z] * bindNormal + bones[boneIndexes.w] * bindNormal);
-    vec3 eyeNormal = normalize(normalMatrix * animatedNormal);
-    vec3 lightPosition = vec3(0.0, 1.0, 0.0);
-    vec4 diffuseColor = vec4(1, 1, 1, 1.0);
-    	
-    float nDotVP = max(1, dot(eyeNormal, normalize(lightPosition)));
-    colorPass = diffuseColor;// * nDotVP;
+	//vec3 animatedNormal = joints[jointIndexes.x] * vec4(bindNormal, 0.0) * biases.x + joints[jointIndexes.x] * vec4(bindNormal, 0.0) * biases.x + joints[jointIndexes.x] * vec4(bindNormal, 0.0) * biases.x + joints[jointIndexes.x] * vec4(bindNormal, 0.0) * biases.x;
+	//vec3 eyeNormal = normalize(normalMatrix * animatedNormal);
+	//vec3 lightPosition = vec3(0.0, 1.0, 0.0);
+	vec4 diffuseColor = vec4(1, 1, 1, 1);
 	
-	mat4 vertexPosition = bones[boneIndexes.x] * weight1 * biases.x + bones[boneIndexes.y] * weight2 * biases.y + bones[boneIndexes.z] * weight3 * biases.z + bones[boneIndexes.w] * weight4 * biases.w;
-    gl_Position = modelViewProjectionMatrix * vertexPosition;
+	//float nDotVP = max(1, dot(eyeNormal, normalize(lightPosition)));
+	colorPass = diffuseColor;// * nDotVP;
+	
+	vec4 vertexPosition = joints[jointIndexes.x] * weight1 * biases.x + joints[jointIndexes.y] * weight2 * biases.y + joints[jointIndexes.z] * weight3 * biases.z + joints[jointIndexes.w] * weight4 * biases.w;
+
+	gl_Position = modelViewProjectionMatrix * vec4(vertexPosition.xyz, 1);
 	
 	textureCoordinatePass = textureCoordinateIn;
 }

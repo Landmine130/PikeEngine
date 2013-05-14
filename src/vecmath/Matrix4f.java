@@ -1176,10 +1176,15 @@ public class Matrix4f implements Serializable {
      * @param v1 the translation amount
      */
     public final void set(Vector3f v1) {
-	setIdentity();
-	setTranslation(v1);
+		setIdentity();
+		setTranslation(v1);
     }
 
+    public final void set(Vector3d v1) {
+    	setIdentity();
+		setTranslation(v1);
+    }
+    
     /**
      * Sets the value of this matrix to a scale and translation matrix;
      * scale is not applied to the translation and all of the matrix
@@ -1947,11 +1952,10 @@ public class Matrix4f implements Serializable {
 	     m02*m02 + m12*m12 + m22*m22
 	    )/3.0
 	    );
-
-	// zero-div may occur.
-	float t = (s == 0.0f ? 0.0f : 1.0f/s);
-
+	
 	if (rot != null) {
+		// zero-div may occur.
+		float t = (s == 0.0f ? 0.0f : 1.0f/s);
 	    this.getRotationScale(rot);
 	    rot.mul(t);
 	}
@@ -1995,9 +1999,9 @@ public class Matrix4f implements Serializable {
       * @param trans the translational component
       */
     private void setTranslation(Vector3d trans) {
-	m30 = (float)trans.x;
-    m31 = (float)trans.y;  
-	m32 = (float)trans.z;
+		m30 = (float)trans.x;
+	    m31 = (float)trans.y;  
+		m32 = (float)trans.z;
     }
 
 
@@ -2012,51 +2016,51 @@ public class Matrix4f implements Serializable {
     }
 
     private void setFromQuat(double x, double y, double z, double w) {
-	double n = x*x + y*y + z*z + w*w;
-	double s = (n > 0.0) ? (2.0/n) : 0.0;
-
-	double xs = x*s,  ys = y*s,  zs = z*s;
-	double wx = w*xs, wy = w*ys, wz = w*zs;
-	double xx = x*xs, xy = x*ys, xz = x*zs;
-	double yy = y*ys, yz = y*zs, zz = z*zs;
-
-	setIdentity();
-	m00 = (float)(1.0 - (yy + zz));	m10 = (float)(xy - wz);         m20 = (float)(xz + wy);
-	m01 = (float)(xy + wz);         m11 = (float)(1.0 - (xx + zz)); m21 = (float)(yz - wx);
-	m02 = (float)(xz - wy);         m12 = (float)(yz + wx);         m22 = (float)(1.0 - (xx + yy));
+		double n = x*x + y*y + z*z + w*w;
+		double s = (n > 0.0) ? (2.0/n) : 0.0;
+	
+		double xs = x*s,  ys = y*s,  zs = z*s;
+		double wx = w*xs, wy = w*ys, wz = w*zs;
+		double xx = x*xs, xy = x*ys, xz = x*zs;
+		double yy = y*ys, yz = y*zs, zz = z*zs;
+	
+		setIdentity();
+		m00 = (float)(1.0 - (yy + zz));	m10 = (float)(xy - wz);         m20 = (float)(xz + wy);
+		m01 = (float)(xy + wz);         m11 = (float)(1.0 - (xx + zz)); m21 = (float)(yz - wx);
+		m02 = (float)(xz - wy);         m12 = (float)(yz + wx);         m22 = (float)(1.0 - (xx + yy));
     }
-
+	
     private void setFromAxisAngle(double x, double y, double z, double angle) {
-	// Taken from Rick's which is taken from Wertz. pg. 412
-	// Bug Fixed and changed into right-handed by hiranabe
-	double n = Math.sqrt(x*x + y*y + z*z);
-	// zero-div may occur
-	n = 1/n;
-	x *= n;
-	y *= n;
-	z *= n;
-	double c = Math.cos(angle);
-	double s = Math.sin(angle);
-	double omc = 1.0 - c;
-
-	m00 = (float)(c + x*x*omc);
-	m11 = (float)(c + y*y*omc);
-	m22 = (float)(c + z*z*omc);
-
-	double tmp1 = x*y*omc;
-	double tmp2 = z*s;
-	m10 = (float)(tmp1 - tmp2);
-	m01 = (float)(tmp1 + tmp2);
-
-	tmp1 = x*z*omc;
-	tmp2 = y*s;
-	m20 = (float)(tmp1 + tmp2);
-	m02 = (float)(tmp1 - tmp2);
-
-	tmp1 = y*z*omc;
-	tmp2 = x*s;
-	m21 = (float)(tmp1 - tmp2);
-	m12 = (float)(tmp1 + tmp2);
+		// Taken from Rick's which is taken from Wertz. pg. 412
+		// Bug Fixed and changed into right-handed by hiranabe
+		double n = Math.sqrt(x*x + y*y + z*z);
+		// zero-div may occur
+		n = 1/n;
+		x *= n;
+		y *= n;
+		z *= n;
+		double c = Math.cos(angle);
+		double s = Math.sin(angle);
+		double omc = 1.0 - c;
+	
+		m00 = (float)(c + x*x*omc);
+		m11 = (float)(c + y*y*omc);
+		m22 = (float)(c + z*z*omc);
+	
+		double tmp1 = x*y*omc;
+		double tmp2 = z*s;
+		m10 = (float)(tmp1 - tmp2);
+		m01 = (float)(tmp1 + tmp2);
+	
+		tmp1 = x*z*omc;
+		tmp2 = y*s;
+		m20 = (float)(tmp1 + tmp2);
+		m02 = (float)(tmp1 - tmp2);
+	
+		tmp1 = y*z*omc;
+		tmp2 = x*s;
+		m21 = (float)(tmp1 - tmp2);
+		m12 = (float)(tmp1 + tmp2);
     }
 /*
 	/**

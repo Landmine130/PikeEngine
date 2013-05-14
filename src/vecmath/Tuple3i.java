@@ -92,7 +92,13 @@ public abstract class Tuple3i implements Serializable {
 		z = t1.z;
     }
     
-    public Tuple3i(Vector3f t1) {
+    public Tuple3i(Tuple3f t1) {
+    	x = (int) t1.x;
+		y = (int) t1.y;
+		z = (int) t1.z;
+    }
+    
+    public Tuple3i(Tuple3d t1) {
     	x = (int) t1.x;
 		y = (int) t1.y;
 		z = (int) t1.z;

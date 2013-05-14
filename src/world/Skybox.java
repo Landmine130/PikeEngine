@@ -110,9 +110,9 @@ public class Skybox implements Drawable {
 		glUseProgram(shader.getProgram());
 		
 		Matrix4f viewMatrix = new Matrix4f();
-	    viewMatrix.rotX(-viewPoint.getOrientation().x);
-	    viewMatrix.rotY(-viewPoint.getOrientation().y);
-	    viewMatrix.rotZ(-viewPoint.getOrientation().z);
+	    viewMatrix.rotX((float)-viewPoint.getOrientation().x);
+	    viewMatrix.rotY((float)-viewPoint.getOrientation().y);
+	    viewMatrix.rotZ((float)-viewPoint.getOrientation().z);
 	    
 	    Matrix4f modelViewProjectionMatrix;
 		Texture texture;

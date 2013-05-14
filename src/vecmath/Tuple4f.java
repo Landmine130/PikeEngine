@@ -17,6 +17,7 @@
 package vecmath;
 
 import java.io.Serializable;
+import java.nio.FloatBuffer;
 
 /**
   * A generic 4 element tuple that is represented by
@@ -477,9 +478,9 @@ public abstract class Tuple4f implements Serializable {
       * @param t2 the second tuple
       * @param alpha the alpha interpolation parameter
       */
-    public final void interpolate(Tuple4f t1, Tuple4f t2, float alpha) {
+    public final void lerp(Tuple4f t1, Tuple4f t2, float alpha) {
 	set(t1);
-	interpolate(t2, alpha);
+	lerp(t2, alpha);
     }
 
 
@@ -490,11 +491,18 @@ public abstract class Tuple4f implements Serializable {
       * @param alpha the alpha interpolation parameter
       *
       */
-    public final void interpolate(Tuple4f t1, float alpha) {
+    public final void lerp(Tuple4f t1, float alpha) {
 	float beta = 1 - alpha;
 	x = beta*x + alpha*t1.x;
 	y = beta*y + alpha*t1.y;
 	z = beta*z + alpha*t1.z;
 	w = beta*w + alpha*t1.w;
+    }
+    
+    public void store(FloatBuffer fb) {
+    	fb.put(x);
+    	fb.put(y);
+    	fb.put(z);
+    	fb.put(w);
     }
 }

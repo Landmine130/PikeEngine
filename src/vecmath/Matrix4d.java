@@ -77,6 +77,11 @@ public class Matrix4d implements Serializable {
  */
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2342179870770569302L;
+
+	/**
       * The first element of the first row.
       */
     public double m00;
@@ -176,10 +181,10 @@ public class Matrix4d implements Serializable {
       * @param m32 the [3][2] element
       * @param m33 the [3][3] element
       */
-    public Matrix4d(double m00, double m01, double m02, double m03, 
-                    double m10, double m11, double m12, double m13,
-                    double m20, double m21, double m22, double m23,
-                    double m30, double m31, double m32, double m33)  {
+    public Matrix4d(double m00, double m10, double m20, double m30, 
+    			double m01, double m11, double m21, double m31,
+    			double m02, double m12, double m22, double m32,
+    			double m03, double m13, double m23, double m33)  {
 	set(
 	    m00, m01, m02, m03,
 	    m10, m11, m12, m13,
@@ -239,6 +244,10 @@ public class Matrix4d implements Serializable {
     public Matrix4d(Matrix4f m1) {
 	set(m1);
     }
+    
+    public Matrix4d(Vector3d v1) {
+ 	   set(v1);
+    }
 
     /**
       * Constructs and initializes a Matrix4d from the rotation matrix,
@@ -276,19 +285,19 @@ public class Matrix4d implements Serializable {
       * Constructs and initializes a Matrix4d to all zeros.
       */
     public Matrix4d() {
-	setZero();
-    }
-
-    /**
-     * Returns a string that contains the values of this Matrix4d.
-     * @return the String representation
-     */
-    public String toString() {
-	String nl = System.getProperty("line.separator"); 
-        return  "[" + nl + "  ["+m00+"\t"+m01+"\t"+m02+"\t"+m03+"]" + nl +
-                   "  ["+m10+"\t"+m11+"\t"+m12+"\t"+m13+"]" + nl +
-                   "  ["+m20+"\t"+m21+"\t"+m22+"\t"+m23+"]" + nl +
-                   "  ["+m30+"\t"+m31+"\t"+m32+"\t"+m33+"] ]";
+		setIdentity();
+	    }
+	
+	    /**
+	     * Returns a string that contains the values of this Matrix4d.
+	     * @return the String representation
+	     */
+	    public String toString() {
+		String nl = System.getProperty("line.separator"); 
+	    return  "[" + nl + "  ["+m00+"\t"+m10+"\t"+m20+"\t"+m30+"]" + nl +
+	            "  ["+m01+"\t"+m11+"\t"+m21+"\t"+m31+"]" + nl +
+	            "  ["+m02+"\t"+m12+"\t"+m22+"\t"+m32+"]" + nl +
+	            "  ["+m03+"\t"+m13+"\t"+m23+"\t"+m33+"] ]";
     }
 
     /**
@@ -308,52 +317,52 @@ public class Matrix4d implements Serializable {
      * @param value the new value
      */
     public final void setElement(int row, int column, double value) {
-	if (row == 0)
-	    if (column == 0)
-		m00 = value;
-	    else if (column == 1)
-		m01 = value;
-	    else if (column == 2)
-		m02 = value;
-	    else if (column == 3)
-		m03 = value;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else if (row == 1)
-	    if (column == 0)
-		m10 = value;
-	    else if (column == 1)
-		m11 = value;
-	    else if (column == 2)
-		m12 = value;
-	    else if (column == 3)
-		m13 = value;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else if (row == 2)
-	    if (column == 0)
-		m20 = value;
-	    else if (column == 1)
-		m21 = value;
-	    else if (column == 2)
-		m22 = value;
-	    else if (column == 3)
-		m23 = value;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else if (row == 3)
-	    if (column == 0)
-		m30 = value;
-	    else if (column == 1)
-		m31 = value;
-	    else if (column == 2)
-		m32 = value;
-	    else if (column == 3)
-		m33 = value;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else
-		throw new ArrayIndexOutOfBoundsException("row must be 0 to 2 and is " + row);
+    	if (column == 0)
+    	    if (row == 0)
+    		m00 = value;
+    	    else if (row == 1)
+    		m01 = value;
+    	    else if (row == 2)
+    		m02 = value;
+    	    else if (row == 3)
+    		m03 = value;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else if (column == 1)
+    	    if (row == 0)
+    		m10 = value;
+    	    else if (row == 1)
+    		m11 = value;
+    	    else if (row == 2)
+    		m12 = value;
+    	    else if (row == 3)
+    		m13 = value;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else if (column == 2)
+    	    if (row == 0)
+    		m20 = value;
+    	    else if (row == 1)
+    		m21 = value;
+    	    else if (row == 2)
+    		m22 = value;
+    	    else if (row == 3)
+    		m23 = value;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else if (column == 3)
+    	    if (row == 0)
+    		m30 = value;
+    	    else if (row == 1)
+    		m31 = value;
+    	    else if (row == 2)
+    		m32 = value;
+    	    else if (row == 3)
+    		m33 = value;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else
+    		throw new ArrayIndexOutOfBoundsException("column must be 0 to 2 and is " + column);
     }
 
     /**
@@ -363,52 +372,52 @@ public class Matrix4d implements Serializable {
      * @return the value at the indexed element
      */
     public final double getElement(int row, int column) {
-	if (row == 0)
-	    if (column == 0)
-		return m00;
-	    else if (column == 1)
-		return m01;
-	    else if (column == 2)
-		return m02;
-	    else if (column == 3)
-		return m03;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else if (row == 1)
-	    if (column == 0)
-		return m10;
-	    else if (column == 1)
-		return m11;
-	    else if (column == 2)
-		return m12;
-	    else if (column == 3)
-		return m13;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else if (row == 2)
-	    if (column == 0)
-		return m20;
-	    else if (column == 1)
-		return m21;
-	    else if (column == 2)
-		return m22;
-	    else if (column == 3)
-		return m23;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else if (row == 3)
-	    if (column == 0)
-		return m30;
-	    else if (column == 1)
-		return m31;
-	    else if (column == 2)
-		return m32;
-	    else if (column == 3)
-		return m33;
-	    else
-		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	else
-		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	if (column == 0)
+    	    if (row == 0)
+    		return m00;
+    	    else if (row == 1)
+    		return m01;
+    	    else if (row == 2)
+    		return m02;
+    	    else if (row == 3)
+    		return m03;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else if (column == 1)
+    	    if (row == 0)
+    		return m10;
+    	    else if (row == 1)
+    		return m11;
+    	    else if (row == 2)
+    		return m12;
+    	    else if (row == 3)
+    		return m13;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else if (column == 2)
+    	    if (row == 0)
+    		return m20;
+    	    else if (row == 1)
+    		return m21;
+    	    else if (row == 2)
+    		return m22;
+    	    else if (row == 3)
+    		return m23;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else if (column == 3)
+    	    if (row == 0)
+    		return m30;
+    	    else if (row == 1)
+    		return m31;
+    	    else if (row == 2)
+    		return m32;
+    	    else if (row == 3)
+    		return m33;
+    	    else
+    		throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	else
+    		throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
     }
 
     /**
@@ -480,9 +489,9 @@ public class Matrix4d implements Serializable {
       * @param trans the vector that will receive the translational component
       */
     public final void get(Vector3d trans) {
-	trans.x = m03;
-	trans.y = m13;
-	trans.z = m23;
+    	trans.x = m30;
+		trans.y = m31;
+		trans.z = m32;
     }
 
     /**
@@ -554,29 +563,29 @@ public class Matrix4d implements Serializable {
      * @param w the fourth column element
      */
     public final void setRow(int row, double x, double y, double z, double w) {
-	if (row == 0) {
-	    m00 = x;
-	    m01 = y;
-	    m02 = z;
-	    m03 = w;
-	} else if (row == 1) {
-	    m10 = x;
-	    m11 = y;
-	    m12 = z;
-	    m13 = w;
-	} else if (row == 2) {
-	    m20 = x;
-	    m21 = y;
-	    m22 = z;
-	    m23 = w;
-	} else if (row == 3) {
-	    m30 = x;
-	    m31 = y;
-	    m32 = z;
-	    m33 = w;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
-	}
+    	if (row == 0) {
+    	    m00 = x;
+    	    m10 = y;
+    	    m20 = z;
+    	    m30 = w;
+    	} else if (row == 1) {
+    	    m01 = x;
+    	    m11 = y;
+    	    m21 = z;
+    	    m31 = w;
+    	} else if (row == 2) {
+    	    m02 = x;
+    	    m12 = y;
+    	    m22 = z;
+    	    m32 = w;
+    	} else if (row == 3) {
+    	    m03 = x;
+    	    m13 = y;
+    	    m23 = z;
+    	    m33 = w;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	}
     }
 
     /**
@@ -585,29 +594,29 @@ public class Matrix4d implements Serializable {
      * @param v the replacement row
      */
     public final void setRow(int row, Vector4d v) {
-	if (row == 0) {
-	    m00 = v.x;
-	    m01 = v.y;
-	    m02 = v.z;
-	    m03 = v.w;
-	} else if (row == 1) {
-	    m10 = v.x;
-	    m11 = v.y;
-	    m12 = v.z;
-	    m13 = v.w;
-	} else if (row == 2) {
-	    m20 = v.x;
-	    m21 = v.y;
-	    m22 = v.z;
-	    m23 = v.w;
-	} else if (row == 3) {
-	    m30 = v.x;
-	    m31 = v.y;
-	    m32 = v.z;
-	    m33 = v.w;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
-	}
+    	if (row == 0) {
+    	    m00 = v.x;
+    	    m10 = v.y;
+    	    m20 = v.z;
+    	    m30 = v.w;
+    	} else if (row == 1) {
+    	    m01 = v.x;
+    	    m11 = v.y;
+    	    m21 = v.z;
+    	    m31 = v.w;
+    	} else if (row == 2) {
+    	    m02 = v.x;
+    	    m12 = v.y;
+    	    m22 = v.z;
+    	    m32 = v.w;
+    	} else if (row == 3) {
+    	    m03 = v.x;
+    	    m13 = v.y;
+    	    m23 = v.z;
+    	    m33 = v.w;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	}
     }
 
     /**
@@ -616,29 +625,29 @@ public class Matrix4d implements Serializable {
       * @param v the replacement row
       */
     public final void setRow(int row, double v[]) {
-	if (row == 0) {
-	    m00 = v[0];
-	    m01 = v[1];
-	    m02 = v[2];
-	    m03 = v[3];
-	} else if (row == 1) {
-	    m10 = v[0];
-	    m11 = v[1];
-	    m12 = v[2];
-	    m13 = v[3];
-	} else if (row == 2) {
-	    m20 = v[0];
-	    m21 = v[1];
-	    m22 = v[2];
-	    m23 = v[3];
-	} else if (row == 3) {
-	    m30 = v[0];
-	    m31 = v[1];
-	    m32 = v[2];
-	    m33 = v[3];
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
-	}
+    	if (row == 0) {
+    	    m00 = v[0];
+    	    m10 = v[1];
+    	    m20 = v[2];
+    	    m30 = v[3];
+    	} else if (row == 1) {
+    	    m01 = v[0];
+    	    m11 = v[1];
+    	    m21 = v[2];
+    	    m31 = v[3];
+    	} else if (row == 2) {
+    	    m02 = v[0];
+    	    m12 = v[1];
+    	    m22 = v[2];
+    	    m32 = v[3];
+    	} else if (row == 3) {
+    	    m03 = v[0];
+    	    m13 = v[1];
+    	    m23 = v[2];
+    	    m33 = v[3];
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	}
     }
 
     /**
@@ -648,29 +657,29 @@ public class Matrix4d implements Serializable {
      * @param v The vector into which the matrix row values will be copied
      */
     public final void getRow(int row, Vector4d v) {
-	if (row == 0) {
-	    v.x = m00;
-	    v.y = m01;
-	    v.z = m02;
-	    v.w = m03;
-	} else if (row == 1) {
-	    v.x = m10;
-	    v.y = m11;
-	    v.z = m12;
-	    v.w = m13;
-	} else if (row == 2) {
-	    v.x = m20;
-	    v.y = m21;
-	    v.z = m22;
-	    v.w = m23;
-	} else if (row == 3) {
-	    v.x = m30;
-	    v.y = m31;
-	    v.z = m32;
-	    v.w = m33;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
-	}
+    	if (row == 0) {
+    	    v.x = m00;
+    	    v.y = m10;
+    	    v.z = m20;
+    	    v.w = m30;
+    	} else if (row == 1) {
+    	    v.x = m01;
+    	    v.y = m11;
+    	    v.z = m21;
+    	    v.w = m31;
+    	} else if (row == 2) {
+    	    v.x = m02;
+    	    v.y = m12;
+    	    v.z = m22;
+    	    v.w = m32;
+    	} else if (row == 3) {
+    	    v.x = m03;
+    	    v.y = m13;
+    	    v.z = m23;
+    	    v.w = m33;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	}
     }
 
     /**
@@ -680,29 +689,29 @@ public class Matrix4d implements Serializable {
       * @param v The array into which the matrix row values will be copied
       */
     public final void getRow(int row, double v[]) {
-	if (row == 0) {
-	    v[0] = m00;
-	    v[1] = m01;
-	    v[2] = m02;
-	    v[3] = m03;
-	} else if (row == 1) {
-	    v[0] = m10;
-	    v[1] = m11;
-	    v[2] = m12;
-	    v[3] = m13;
-	} else if (row == 2) {
-	    v[0] = m20;
-	    v[1] = m21;
-	    v[2] = m22;
-	    v[3] = m23;
-	} else if (row == 3) {
-	    v[0] = m30;
-	    v[1] = m31;
-	    v[2] = m32;
-	    v[3] = m33;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
-	}
+    	if (row == 0) {
+    	    v[0] = m00;
+    	    v[1] = m10;
+    	    v[2] = m20;
+    	    v[3] = m30;
+    	} else if (row == 1) {
+    	    v[0] = m01;
+    	    v[1] = m11;
+    	    v[2] = m21;
+    	    v[3] = m31;
+    	} else if (row == 2) {
+    	    v[0] = m02;
+    	    v[1] = m12;
+    	    v[2] = m22;
+    	    v[3] = m32;
+    	} else if (row == 3) {
+    	    v[0] = m03;
+    	    v[1] = m13;
+    	    v[2] = m23;
+    	    v[3] = m33;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("row must be 0 to 3 and is " + row);
+    	}
     }
 
     /**
@@ -714,29 +723,29 @@ public class Matrix4d implements Serializable {
       * @param w the fourth row element
       */
     public final void setColumn(int column, double x, double y, double z, double w) {
-	if (column == 0) {
-	    m00 = x;
-	    m10 = y;
-	    m20 = z;
-	    m30 = w;
-	}  else if (column == 1) {
-	    m01 = x;
-	    m11 = y;
-	    m21 = z;
-	    m31 = w;
-	} else if (column == 2) {
-	    m02 = x;
-	    m12 = y;
-	    m22 = z;
-	    m32 = w;
-	} else if (column == 3) {
-	    m03 = x;
-	    m13 = y;
-	    m23 = z;
-	    m33 = w;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	}
+    	if (column == 0) {
+    	    m00 = x;
+    	    m01 = y;
+    	    m02 = z;
+    	    m03 = w;
+    	}  else if (column == 1) {
+    	    m10 = x;
+    	    m11 = y;
+    	    m12 = z;
+    	    m13 = w;
+    	} else if (column == 2) {
+    	    m20 = x;
+    	    m21 = y;
+    	    m22 = z;
+    	    m23 = w;
+    	} else if (column == 3) {
+    	    m30 = x;
+    	    m31 = y;
+    	    m32 = z;
+    	    m33 = w;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
+    	}
     }
 
     /**
@@ -745,29 +754,29 @@ public class Matrix4d implements Serializable {
       * @param v the replacement column
       */
     public final void setColumn(int column, Vector4d v) {
-	if (column == 0) {
-	    m00 = v.x;
-	    m10 = v.y;
-	    m20 = v.z;
-	    m30 = v.w;
-	} else if (column == 1) {
-	    m01 = v.x;
-	    m11 = v.y;
-	    m21 = v.z;
-	    m31 = v.w;
-	} else if (column == 2) {
-	    m02 = v.x;
-	    m12 = v.y;
-	    m22 = v.z;
-	    m32 = v.w;
-	} else if (column == 3) {
-	    m03 = v.x;
-	    m13 = v.y;
-	    m23 = v.z;
-	    m33 = v.w;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	}
+    	if (column == 0) {
+    	    m00 = v.x;
+    	    m01 = v.y;
+    	    m02 = v.z;
+    	    m03 = v.w;
+    	} else if (column == 1) {
+    	    m10 = v.x;
+    	    m11 = v.y;
+    	    m12 = v.z;
+    	    m13 = v.w;
+    	} else if (column == 2) {
+    	    m20 = v.x;
+    	    m21 = v.y;
+    	    m22 = v.z;
+    	    m23 = v.w;
+    	} else if (column == 3) {
+    	    m30 = v.x;
+    	    m31 = v.y;
+    	    m32 = v.z;
+    	    m33 = v.w;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
+    	}
     }
 
     /**
@@ -776,29 +785,29 @@ public class Matrix4d implements Serializable {
       * @param v       the replacement column 
       */
     public final void setColumn(int column,  double v[]) {
-	if (column == 0) {
-	    m00 = v[0];
-	    m10 = v[1];
-	    m20 = v[2];
-	    m30 = v[3];
-	} else if (column == 1) {
-	    m01 = v[0];
-	    m11 = v[1];
-	    m21 = v[2];
-	    m31 = v[3];
-	} else if (column == 2) {
-	    m02 = v[0];
-	    m12 = v[1];
-	    m22 = v[2];
-	    m32 = v[3];
-	} else if (column == 3) {
-	    m03 = v[0];
-	    m13 = v[1];
-	    m23 = v[2];
-	    m33 = v[3];
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	}
+    	if (column == 0) {
+    	    m00 = v[0];
+    	    m01 = v[1];
+    	    m02 = v[2];
+    	    m03 = v[3];
+    	} else if (column == 1) {
+    	    m10 = v[0];
+    	    m11 = v[1];
+    	    m12 = v[2];
+    	    m13 = v[3];
+    	} else if (column == 2) {
+    	    m20 = v[0];
+    	    m21 = v[1];
+    	    m22 = v[2];
+    	    m23 = v[3];
+    	} else if (column == 3) {
+    	    m30 = v[0];
+    	    m31 = v[1];
+    	    m32 = v[2];
+    	    m33 = v[3];
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
+    	}
     }
     /**
      * Copies the matrix values in the specified column into the
@@ -807,29 +816,29 @@ public class Matrix4d implements Serializable {
      * @param v The vector into which the matrix column values will be copied
      */
     public final void getColumn(int column, Vector4d v) {
-	if (column == 0) {
-	    v.x = m00;
-	    v.y = m10;
-	    v.z = m20;
-	    v.w = m30;
-	} else if (column == 1) {
-	    v.x = m01;
-	    v.y = m11;
-	    v.z = m21;
-	    v.w = m31;
-	} else if (column == 2) {
-	    v.x = m02;
-	    v.y = m12;
-	    v.z = m22;
-	    v.w = m32;
-	} else if (column == 3) {
-	    v.x = m03;
-	    v.y = m13;
-	    v.z = m23;
-	    v.w = m33;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	}
+    	if (column == 0) {
+    	    v.x = m00;
+    	    v.y = m01;
+    	    v.z = m02;
+    	    v.w = m03;
+    	} else if (column == 1) {
+    	    v.x = m10;
+    	    v.y = m11;
+    	    v.z = m12;
+    	    v.w = m13;
+    	} else if (column == 2) {
+    	    v.x = m20;
+    	    v.y = m21;
+    	    v.z = m22;
+    	    v.w = m23;
+    	} else if (column == 3) {
+    	    v.x = m30;
+    	    v.y = m31;
+    	    v.z = m32;
+    	    v.w = m33;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
+    	}
     }
 
     /**
@@ -839,29 +848,29 @@ public class Matrix4d implements Serializable {
       * @param v The array into which the matrix column values will be copied
       */
     public final void getColumn(int column, double v[]) {
-	if (column == 0) {
-	    v[0] = m00;
-	    v[1] = m10;
-	    v[2] = m20;
-	    v[3] = m30;
-	} else if (column == 1) {
-	    v[0] = m01;
-	    v[1] = m11;
-	    v[2] = m21;
-	    v[3] = m31;
-	} else if (column == 2) {
-	    v[0] = m02;
-	    v[1] = m12;
-	    v[2] = m22;
-	    v[3] = m32;
-	} else if (column == 3) {
-	    v[0] = m03;
-	    v[1] = m13;
-	    v[2] = m23;
-	    v[3] = m33;
-	} else {
-	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
-	}
+    	if (column == 0) {
+    	    v[0] = m00;
+    	    v[1] = m01;
+    	    v[2] = m02;
+    	    v[3] = m03;
+    	} else if (column == 1) {
+    	    v[0] = m10;
+    	    v[1] = m11;
+    	    v[2] = m12;
+    	    v[3] = m13;
+    	} else if (column == 2) {
+    	    v[0] = m20;
+    	    v[1] = m21;
+    	    v[2] = m22;
+    	    v[3] = m23;
+    	} else if (column == 3) {
+    	    v[0] = m30;
+    	    v[1] = m31;
+    	    v[2] = m32;
+    	    v[3] = m33;
+    	} else {
+    	    throw new ArrayIndexOutOfBoundsException("column must be 0 to 3 and is " + column);
+    	}
     }
 
     /**
@@ -1010,10 +1019,10 @@ public class Matrix4d implements Serializable {
       * row of this matrix, etc.).
       */
     public final void set(double m[]) {
-	m00 = m[ 0]; m01 = m[ 1]; m02 = m[ 2]; m03 = m[ 3];
-	m10 = m[ 4]; m11 = m[ 5]; m12 = m[ 6]; m13 = m[ 7];
-	m20 = m[ 8]; m21 = m[ 9]; m22 = m[10]; m23 = m[11];
-	m30 = m[12]; m31 = m[13]; m32 = m[14]; m33 = m[15];
+    	m00 = m[ 0]; m10 = m[ 1]; m20 = m[ 2]; m30 = m[ 3];
+    	m01 = m[ 4]; m11 = m[ 5]; m21 = m[ 6]; m31 = m[ 7];
+    	m02 = m[ 8]; m12 = m[ 9]; m22 = m[10]; m32 = m[11];
+    	m03 = m[12]; m13 = m[13]; m23 = m[14]; m33 = m[15];
     }
 
     /**
@@ -1104,9 +1113,9 @@ public class Matrix4d implements Serializable {
     public final void set(Quat4f q1, Vector3d t1, double s) {
 	set(q1);
 	mulRotationScale(s);
-	m03 = t1.x;
-	m13 = t1.y;
-	m23 = t1.z;
+	m30 = t1.x;
+	m31 = t1.y;
+	m32 = t1.z;
     }
 
   /**
@@ -1119,9 +1128,9 @@ public class Matrix4d implements Serializable {
     public final void set(Quat4f q1, Vector3f t1, float s) {
 	set(q1);
 	mulRotationScale(s);
-	m03 = t1.x;
-	m13 = t1.y;
-	m23 = t1.z;
+	m30 = t1.x;
+	m31 = t1.y;
+	m32 = t1.z;
     }
 
     /**
@@ -1168,27 +1177,27 @@ public class Matrix4d implements Serializable {
 	s = 1/s;
 	// alias-safe way.
 	// less *,+,- calculation than expanded expression.
-	set(
-	    m11*(m22*m33 - m23*m32) + m12*(m23*m31 - m21*m33) + m13*(m21*m32 - m22*m31),
-	    m21*(m02*m33 - m03*m32) + m22*(m03*m31 - m01*m33) + m23*(m01*m32 - m02*m31),
-	    m31*(m02*m13 - m03*m12) + m32*(m03*m11 - m01*m13) + m33*(m01*m12 - m02*m11),
-	    m01*(m13*m22 - m12*m23) + m02*(m11*m23 - m13*m21) + m03*(m12*m21 - m11*m22),
+		set(
+		    m11*(m22*m33 - m32*m23) + m21*(m32*m13 - m12*m33) + m31*(m12*m23 - m22*m13),
+		    m12*(m20*m33 - m30*m23) + m22*(m30*m13 - m10*m33) + m32*(m10*m23 - m20*m13),
+		    m13*(m20*m31 - m30*m21) + m23*(m30*m11 - m10*m31) + m33*(m10*m21 - m20*m11),
+		    m10*(m31*m22 - m21*m32) + m20*(m11*m32 - m31*m12) + m30*(m21*m12 - m11*m22),
 
-	    m12*(m20*m33 - m23*m30) + m13*(m22*m30 - m20*m32) + m10*(m23*m32 - m22*m33),
-	    m22*(m00*m33 - m03*m30) + m23*(m02*m30 - m00*m32) + m20*(m03*m32 - m02*m33),
-	    m32*(m00*m13 - m03*m10) + m33*(m02*m10 - m00*m12) + m30*(m03*m12 - m02*m13),
-	    m02*(m13*m20 - m10*m23) + m03*(m10*m22 - m12*m20) + m00*(m12*m23 - m13*m22),
+		    m21*(m02*m33 - m32*m03) + m31*(m22*m03 - m02*m23) + m01*(m32*m23 - m22*m33),
+		    m22*(m00*m33 - m30*m03) + m32*(m20*m03 - m00*m23) + m02*(m30*m23 - m20*m33),
+		    m23*(m00*m31 - m30*m01) + m33*(m20*m01 - m00*m21) + m03*(m30*m21 - m20*m31),
+		    m20*(m31*m02 - m01*m32) + m30*(m01*m22 - m21*m02) + m00*(m21*m32 - m31*m22),
 
-	    m13*(m20*m31 - m21*m30) + m10*(m21*m33 - m23*m31) + m11*(m23*m30 - m20*m33),
-	    m23*(m00*m31 - m01*m30) + m20*(m01*m33 - m03*m31) + m21*(m03*m30 - m00*m33),
-	    m33*(m00*m11 - m01*m10) + m30*(m01*m13 - m03*m11) + m31*(m03*m10 - m00*m13),
-	    m03*(m11*m20 - m10*m21) + m00*(m13*m21 - m11*m23) + m01*(m10*m23 - m13*m20),
+		    m31*(m02*m13 - m12*m03) + m01*(m12*m33 - m32*m13) + m11*(m32*m03 - m02*m33),
+		    m32*(m00*m13 - m10*m03) + m02*(m10*m33 - m30*m13) + m12*(m30*m03 - m00*m33),
+		    m33*(m00*m11 - m10*m01) + m03*(m10*m31 - m30*m11) + m13*(m30*m01 - m00*m31),
+		    m30*(m11*m02 - m01*m12) + m00*(m31*m12 - m11*m32) + m10*(m01*m32 - m31*m02),
 
-	    m10*(m22*m31 - m21*m32) + m11*(m20*m32 - m22*m30) + m12*(m21*m30 - m20*m31),
-	    m20*(m02*m31 - m01*m32) + m21*(m00*m32 - m02*m30) + m22*(m01*m30 - m00*m31),
-	    m30*(m02*m11 - m01*m12) + m31*(m00*m12 - m02*m10) + m32*(m01*m10 - m00*m11),
-	    m00*(m11*m22 - m12*m21) + m01*(m12*m20 - m10*m22) + m02*(m10*m21 - m11*m20)
-	    );
+		    m01*(m22*m13 - m12*m23) + m11*(m02*m23 - m22*m03) + m21*(m12*m03 - m02*m13),
+		    m02*(m20*m13 - m10*m23) + m12*(m00*m23 - m20*m03) + m22*(m10*m03 - m00*m13),
+		    m03*(m20*m11 - m10*m21) + m13*(m00*m21 - m20*m01) + m23*(m10*m01 - m00*m11),
+		    m00*(m11*m22 - m21*m12) + m10*(m21*m02 - m01*m22) + m20*(m01*m12 - m11*m02)
+		    );
 
 	mul(s);
     }
@@ -1199,13 +1208,13 @@ public class Matrix4d implements Serializable {
      */
     public final double determinant()  {
 	// less *,+,- calculation than expanded expression.
-	return
-	    (m00*m11 - m01*m10)*(m22*m33 - m23*m32)
-	   -(m00*m12 - m02*m10)*(m21*m33 - m23*m31)
-	   +(m00*m13 - m03*m10)*(m21*m32 - m22*m31)
-	   +(m01*m12 - m02*m11)*(m20*m33 - m23*m30)
-	   -(m01*m13 - m03*m11)*(m20*m32 - m22*m30)
-	   +(m02*m13 - m03*m12)*(m20*m31 - m21*m30);
+    	return
+    		    (m00*m11 - m10*m01)*(m22*m33 - m32*m23)
+    		   -(m00*m21 - m20*m01)*(m12*m33 - m32*m13)
+    		   +(m00*m31 - m30*m01)*(m12*m23 - m22*m13)
+    		   +(m10*m21 - m20*m11)*(m02*m33 - m32*m03)
+    		   -(m10*m31 - m30*m11)*(m02*m23 - m22*m03)
+    		   +(m20*m31 - m30*m21)*(m02*m13 - m12*m03);
 
     }
 
@@ -1251,10 +1260,10 @@ public class Matrix4d implements Serializable {
      * @param scale the scale factor for the matrix
      */
     public final void set(Vector3d v1, double scale) {
-	m00 = scale; m01 = 0.0;   m02 = 0.0;   m03 = scale*v1.x;
-	m10 = 0.0;   m11 = scale; m12 = 0.0;   m13 = scale*v1.y;
-	m20 = 0.0;   m21 = 0.0;   m22 = scale; m23 = scale*v1.z;
-	m30 = 0.0;   m31 = 0.0;   m32 = 0.0;   m33 = 1.0;
+	m00 = scale; m01 = 0.0;   m02 = 0.0;   m30 = scale*v1.x;
+	m10 = 0.0;   m11 = scale; m12 = 0.0;   m31 = scale*v1.y;
+	m20 = 0.0;   m21 = 0.0;   m22 = scale; m32 = scale*v1.z;
+	m03 = 0.0;   m13 = 0.0;   m23 = 0.0;   m33 = 1.0;
     }
 
     /**
@@ -1293,53 +1302,173 @@ public class Matrix4d implements Serializable {
       * @param trans the translational component
       */
     public final void setTranslation(Vector3d trans) {
-	m03 = trans.x;
-        m13 = trans.y;  
-	m23 = trans.z;
+    	m30 = trans.x;
+        m31 = trans.y;  
+        m32 = trans.z;
     }
 
+    
+	/**
+	 * Rotates the matrix around the given axis the specified angle
+	 * @param angle the angle, in radians.
+	 * @param axis The vector representing the rotation axis. Must be normalized.
+	 * @return this
+	 */
+	public Matrix4d rotate(double angle, Vector3d axis) {
+		return rotate(angle, axis, this);
+	}
+
+	/**
+	 * Rotates the matrix around the given axis the specified angle
+	 * @param angle the angle, in radians.
+	 * @param axis The vector representing the rotation axis. Must be normalized.
+	 * @param dest The matrix to put the result, or null if a new matrix is to be created
+	 * @return The rotated matrix
+	 */
+	public Matrix4d rotate(double angle, Vector3d axis, Matrix4d dest) {
+		return rotate(angle, axis, this, dest);
+	}
+
+	/**
+	 * Rotates the source matrix around the given axis the specified angle and
+	 * put the result in the destination matrix.
+	 * @param angle the angle, in radians.
+	 * @param axis The vector representing the rotation axis. Must be normalized.
+	 * @param src The matrix to rotate
+	 * @param dest The matrix to put the result, or null if a new matrix is to be created
+	 * @return The rotated matrix
+	 */
+	public static Matrix4d rotate(double angle, Vector3d axis, Matrix4d src, Matrix4d dest) {
+		if (dest == null)
+			dest = new Matrix4d();
+		double c = Math.cos(angle);
+		double s = Math.sin(angle);
+		double oneminusc = 1.0f - c;
+		double xy = axis.x*axis.y;
+		double yz = axis.y*axis.z;
+		double xz = axis.x*axis.z;
+		double xs = axis.x*s;
+		double ys = axis.y*s;
+		double zs = axis.z*s;
+
+		double f00 = axis.x*axis.x*oneminusc+c;
+		double f01 = xy*oneminusc+zs;
+		double f02 = xz*oneminusc-ys;
+		// n[3] not used
+		double f10 = xy*oneminusc-zs;
+		double f11 = axis.y*axis.y*oneminusc+c;
+		double f12 = yz*oneminusc+xs;
+		// n[7] not used
+		double f20 = xz*oneminusc+ys;
+		double f21 = yz*oneminusc-xs;
+		double f22 = axis.z*axis.z*oneminusc+c;
+
+		double t00 = src.m00 * f00 + src.m10 * f01 + src.m20 * f02;
+		double t01 = src.m01 * f00 + src.m11 * f01 + src.m21 * f02;
+		double t02 = src.m02 * f00 + src.m12 * f01 + src.m22 * f02;
+		double t03 = src.m03 * f00 + src.m13 * f01 + src.m23 * f02;
+		double t10 = src.m00 * f10 + src.m10 * f11 + src.m20 * f12;
+		double t11 = src.m01 * f10 + src.m11 * f11 + src.m21 * f12;
+		double t12 = src.m02 * f10 + src.m12 * f11 + src.m22 * f12;
+		double t13 = src.m03 * f10 + src.m13 * f11 + src.m23 * f12;
+		dest.m20 = src.m00 * f20 + src.m10 * f21 + src.m20 * f22;
+		dest.m21 = src.m01 * f20 + src.m11 * f21 + src.m21 * f22;
+		dest.m22 = src.m02 * f20 + src.m12 * f21 + src.m22 * f22;
+		dest.m23 = src.m03 * f20 + src.m13 * f21 + src.m23 * f22;
+		dest.m00 = t00;
+		dest.m01 = t01;
+		dest.m02 = t02;
+		dest.m03 = t03;
+		dest.m10 = t10;
+		dest.m11 = t11;
+		dest.m12 = t12;
+		dest.m13 = t13;
+		return dest;
+	}
 
     /**
-     * Sets the value of this matrix to a rotation matrix about the x axis
-     * by the passed angle. 
+     * Rotates this matrix about the x axis
+     * by the passed angle.
      * @param angle the angle to rotate about the X axis in radians 
      */
     public final void rotX(double angle)  {
-	double c = Math.cos(angle);
-	double s = Math.sin(angle);
-	m00 = 1.0; m01 = 0.0; m02 = 0.0; m03 = 0.0;
-	m10 = 0.0; m11 = c;   m12 = -s;  m13 = 0.0;
-	m20 = 0.0; m21 = s;   m22 = c;   m23 = 0.0;
-	m30 = 0.0; m31 = 0.0; m32 = 0.0; m33 = 1.0; 
+    	rotate(angle, Vector3d.X_UNIT_VECTOR, this, this);
     }
 
     /**
-     * Sets the value of this matrix to a rotation matrix about the y axis
-     * by the passed angle. 
+     * Rotates this matrix about the y axis
+     * by the passed angle.
      * @param angle the angle to rotate about the Y axis in radians 
      */
     public final void rotY(double angle)  {
-	double c = Math.cos(angle);
-	double s = Math.sin(angle);
-	m00 = c;   m01 = 0.0; m02 = s;   m03 = 0.0;
-	m10 = 0.0; m11 = 1.0; m12 = 0.0; m13 = 0.0;
-	m20 = -s;  m21 = 0.0; m22 = c;   m23 = 0.0;
-	m30 = 0.0; m31 = 0.0; m32 = 0.0; m33 = 1.0; 
+    	rotate(angle, Vector3d.Y_UNIT_VECTOR, this, this);
     }
 
     /**
-     * Sets the value of this matrix to a rotation matrix about the z axis
-     * by the passed angle. 
-     * @param angle the angle to rotate about the Z axis in radians 
+     * Rotates this matrix about the z axis
+     * by the passed angle.
+     * @param angle the angle to rotate about the Z axis in radians
      */
     public final void rotZ(double angle)  {
-	double c = Math.cos(angle);
-	double s = Math.sin(angle);
-	m00 = c;   m01 = -s;  m02 = 0.0; m03 = 0.0;
-	m10 = s;   m11 = c;   m12 = 0.0; m13 = 0.0;
-	m20 = 0.0; m21 = 0.0; m22 = 1.0; m23 = 0.0;
-	m30 = 0.0; m31 = 0.0; m32 = 0.0; m33 = 1.0; 
+    	rotate(angle, Vector3d.Z_UNIT_VECTOR, this, this);
     }
+    
+    
+ 	public Matrix4d translate(Vector3d vec) {
+		return translate(vec, this, this);
+	}
+     
+ 	public Matrix4d translate(Vector3d vec, Matrix4d dest) {
+		return translate(vec, this, dest);
+	}
+
+	/**
+	 * Translate the source matrix and stash the result in the destination matrix
+	 * @param vec The vector to translate by
+	 * @param src The source matrix
+	 * @param dest The destination matrix or null if a new matrix is to be created
+	 * @return The translated matrix
+	 */
+	public static Matrix4d translate(Vector3d vec, Matrix4d src, Matrix4d dest) {
+		if (dest == null)
+			dest = new Matrix4d();
+
+		dest.m30 += src.m00 * vec.x + src.m10 * vec.y + src.m20 * vec.z;
+		dest.m31 += src.m01 * vec.x + src.m11 * vec.y + src.m21 * vec.z;
+		dest.m32 += src.m02 * vec.x + src.m12 * vec.y + src.m22 * vec.z;
+		dest.m33 += src.m03 * vec.x + src.m13 * vec.y + src.m23 * vec.z;
+
+		return dest;
+	}
+
+	/**
+	 * Translate this matrix and stash the result in another matrix
+	 * @param vec The vector to translate by
+	 * @param dest The destination matrix or null if a new matrix is to be created
+	 * @return the translated matrix
+	 */
+	public Matrix4d translate(Vector2d vec, Matrix4d dest) {
+		return translate(vec, this, dest);
+	}
+
+	/**
+	 * Translate the source matrix and stash the result in the destination matrix
+	 * @param vec The vector to translate by
+	 * @param src The source matrix
+	 * @param dest The destination matrix or null if a new matrix is to be created
+	 * @return The translated matrix
+	 */
+	public static Matrix4d translate(Vector2d vec, Matrix4d src, Matrix4d dest) {
+		if (dest == null)
+			dest = new Matrix4d();
+
+		dest.m30 += src.m00 * vec.x + src.m10 * vec.y;
+		dest.m31 += src.m01 * vec.x + src.m11 * vec.y;
+		dest.m32 += src.m02 * vec.x + src.m12 * vec.y;
+		dest.m33 += src.m03 * vec.x + src.m13 * vec.y;
+
+		return dest;
+	}
 
     /**
       * Multiplies each element of this matrix by a scalar.
@@ -1381,25 +1510,25 @@ public class Matrix4d implements Serializable {
     public final void mul(Matrix4d m1, Matrix4d m2) {
 	// alias-safe way
 	set(
-	    m1.m00*m2.m00 + m1.m01*m2.m10 + m1.m02*m2.m20 + m1.m03*m2.m30,
-	    m1.m00*m2.m01 + m1.m01*m2.m11 + m1.m02*m2.m21 + m1.m03*m2.m31,
-	    m1.m00*m2.m02 + m1.m01*m2.m12 + m1.m02*m2.m22 + m1.m03*m2.m32,
-	    m1.m00*m2.m03 + m1.m01*m2.m13 + m1.m02*m2.m23 + m1.m03*m2.m33,
+		    m1.m00*m2.m00 + m1.m10*m2.m01 + m1.m20*m2.m02 + m1.m30*m2.m03,
+		    m1.m00*m2.m10 + m1.m10*m2.m11 + m1.m20*m2.m12 + m1.m30*m2.m13,
+		    m1.m00*m2.m20 + m1.m10*m2.m21 + m1.m20*m2.m22 + m1.m30*m2.m23,
+		    m1.m00*m2.m30 + m1.m10*m2.m31 + m1.m20*m2.m32 + m1.m30*m2.m33,
 
-	    m1.m10*m2.m00 + m1.m11*m2.m10 + m1.m12*m2.m20 + m1.m13*m2.m30,
-	    m1.m10*m2.m01 + m1.m11*m2.m11 + m1.m12*m2.m21 + m1.m13*m2.m31,
-	    m1.m10*m2.m02 + m1.m11*m2.m12 + m1.m12*m2.m22 + m1.m13*m2.m32,
-	    m1.m10*m2.m03 + m1.m11*m2.m13 + m1.m12*m2.m23 + m1.m13*m2.m33,
+		    m1.m01*m2.m00 + m1.m11*m2.m01 + m1.m21*m2.m02 + m1.m31*m2.m03,
+		    m1.m01*m2.m10 + m1.m11*m2.m11 + m1.m21*m2.m12 + m1.m31*m2.m13,
+		    m1.m01*m2.m20 + m1.m11*m2.m21 + m1.m21*m2.m22 + m1.m31*m2.m23,
+		    m1.m01*m2.m30 + m1.m11*m2.m31 + m1.m21*m2.m32 + m1.m31*m2.m33,
 
-	    m1.m20*m2.m00 + m1.m21*m2.m10 + m1.m22*m2.m20 + m1.m23*m2.m30,
-	    m1.m20*m2.m01 + m1.m21*m2.m11 + m1.m22*m2.m21 + m1.m23*m2.m31,
-	    m1.m20*m2.m02 + m1.m21*m2.m12 + m1.m22*m2.m22 + m1.m23*m2.m32,
-	    m1.m20*m2.m03 + m1.m21*m2.m13 + m1.m22*m2.m23 + m1.m23*m2.m33,
+		    m1.m02*m2.m00 + m1.m12*m2.m01 + m1.m22*m2.m02 + m1.m32*m2.m03,
+		    m1.m02*m2.m10 + m1.m12*m2.m11 + m1.m22*m2.m12 + m1.m32*m2.m13,
+		    m1.m02*m2.m20 + m1.m12*m2.m21 + m1.m22*m2.m22 + m1.m32*m2.m23,
+		    m1.m02*m2.m30 + m1.m12*m2.m31 + m1.m22*m2.m32 + m1.m32*m2.m33,
 
-	    m1.m30*m2.m00 + m1.m31*m2.m10 + m1.m32*m2.m20 + m1.m33*m2.m30,
-	    m1.m30*m2.m01 + m1.m31*m2.m11 + m1.m32*m2.m21 + m1.m33*m2.m31,
-	    m1.m30*m2.m02 + m1.m31*m2.m12 + m1.m32*m2.m22 + m1.m33*m2.m32,
-	    m1.m30*m2.m03 + m1.m31*m2.m13 + m1.m32*m2.m23 + m1.m33*m2.m33
+		    m1.m03*m2.m00 + m1.m13*m2.m01 + m1.m23*m2.m02 + m1.m33*m2.m03,
+		    m1.m03*m2.m10 + m1.m13*m2.m11 + m1.m23*m2.m12 + m1.m33*m2.m13,
+		    m1.m03*m2.m20 + m1.m13*m2.m21 + m1.m23*m2.m22 + m1.m33*m2.m23,
+		    m1.m03*m2.m30 + m1.m13*m2.m31 + m1.m23*m2.m32 + m1.m33*m2.m33
 	    );
   }
 
@@ -1420,7 +1549,7 @@ public class Matrix4d implements Serializable {
       * @param m1 The matrix on the left hand side of the multiplication
       * @param m2 The matrix on the right hand side of the multiplication
       */
-    public final void mulTransposeRight(Matrix4d m1, Matrix4d m2) {
+/*    public final void mulTransposeRight(Matrix4d m1, Matrix4d m2) {
 	// alias-safe way.
 	set(
 	    m1.m00*m2.m00 + m1.m01*m2.m01 + m1.m02*m2.m02 + m1.m03*m2.m03,
@@ -1444,7 +1573,7 @@ public class Matrix4d implements Serializable {
 	    m1.m30*m2.m30 + m1.m31*m2.m31 + m1.m32*m2.m32 + m1.m33*m2.m33
 	    );
     }
-
+*/
     
     /**
       * Multiplies the transpose of matrix m1 times matrix m2, and places the
@@ -1452,7 +1581,7 @@ public class Matrix4d implements Serializable {
       * @param m1 The matrix on the left hand side of the multiplication
       * @param m2 The matrix on the right hand side of the multiplication
       */
-    public final void mulTransposeLeft(Matrix4d m1, Matrix4d m2) {
+/*    public final void mulTransposeLeft(Matrix4d m1, Matrix4d m2) {
 	// alias-safe way.
 	set(
 	    m1.m00*m2.m00 + m1.m10*m2.m10 + m1.m20*m2.m20 + m1.m30*m2.m30,
@@ -1476,7 +1605,7 @@ public class Matrix4d implements Serializable {
 	    m1.m03*m2.m03 + m1.m13*m2.m13 + m1.m23*m2.m23 + m1.m33*m2.m33
 	    );
     }
-
+*/
 
     /**
      * Returns true if all of the data members of Matrix4d m1 are
@@ -1630,10 +1759,10 @@ public class Matrix4d implements Serializable {
     public final void transform(Tuple4d vec, Tuple4d vecOut) {
 	// alias-safe
 	vecOut.set(
-	    m00*vec.x + m01*vec.y + m02*vec.z + m03*vec.w,
-	    m10*vec.x + m11*vec.y + m12*vec.z + m13*vec.w,
-	    m20*vec.x + m21*vec.y + m22*vec.z + m23*vec.w,
-	    m30*vec.x + m31*vec.y + m32*vec.z + m33*vec.w
+		    m00*vec.x + m10*vec.y + m20*vec.z + m30*vec.w,
+		    m01*vec.x + m11*vec.y + m21*vec.z + m31*vec.w,
+		    m02*vec.x + m12*vec.y + m22*vec.z + m32*vec.w,
+		    m03*vec.x + m13*vec.y + m23*vec.z + m33*vec.w
 	    );
     }
 
@@ -1655,10 +1784,10 @@ public class Matrix4d implements Serializable {
     public final void transform(Tuple4f vec, Tuple4f vecOut) {
 	// alias-safe
 	vecOut.set(
-	    (float)(m00*vec.x + m01*vec.y + m02*vec.z + m03*vec.w),
-	    (float)(m10*vec.x + m11*vec.y + m12*vec.z + m13*vec.w),
-	    (float)(m20*vec.x + m21*vec.y + m22*vec.z + m23*vec.w),
-	    (float)(m30*vec.x + m31*vec.y + m32*vec.z + m33*vec.w)
+		    (float)(m00*vec.x + m10*vec.y + m20*vec.z + m30*vec.w),
+			(float)(m01*vec.x + m11*vec.y + m21*vec.z + m31*vec.w),
+			(float)(m02*vec.x + m12*vec.y + m22*vec.z + m32*vec.w),
+			(float)(m03*vec.x + m13*vec.y + m23*vec.z + m33*vec.w)
 	    );
     }
 
@@ -1680,9 +1809,9 @@ public class Matrix4d implements Serializable {
       */
     public final void transform(Point3d point, Point3d pointOut) {
 	pointOut.set(
-	    m00*point.x + m01*point.y + m02*point.z + m03,
-	    m10*point.x + m11*point.y + m12*point.z + m13,
-	    m20*point.x + m21*point.y + m22*point.z + m23
+		    m00*point.x + m10*point.y + m20*point.z + m03,
+		    m01*point.x + m11*point.y + m21*point.z + m13,
+		    m02*point.x + m12*point.y + m22*point.z + m23
 	    );
     }
 
@@ -1706,9 +1835,9 @@ public class Matrix4d implements Serializable {
       */
     public final void transform(Point3f point, Point3f pointOut) {
 	pointOut.set(
-	    (float)(m00*point.x + m01*point.y + m02*point.z + m03),
-	    (float)(m10*point.x + m11*point.y + m12*point.z + m13),
-	    (float)(m20*point.x + m21*point.y + m22*point.z + m23)
+	    (float)(m00*point.x + m10*point.y + m20*point.z + m03),
+	  	(float)(m01*point.x + m11*point.y + m21*point.z + m13),
+	    (float)(m02*point.x + m12*point.y + m22*point.z + m23)
 	    );
     }
 
@@ -1730,9 +1859,9 @@ public class Matrix4d implements Serializable {
      */
     public final void transform(Vector3d normal, Vector3d normalOut) {
 	normalOut.set(
-	    m00 * normal.x + m01 * normal.y + m02 * normal.z,
-	    m10 * normal.x + m11 * normal.y + m12 * normal.z,
-	    m20 * normal.x + m21 * normal.y + m22 * normal.z
+		    m00 * normal.x + m10 * normal.y + m20 * normal.z,
+		    m01 * normal.x + m11 * normal.y + m21 * normal.z,
+		    m02 * normal.x + m12 * normal.y + m22 * normal.z
 	    );
     }
 
@@ -1753,9 +1882,9 @@ public class Matrix4d implements Serializable {
      */
     public final void transform(Vector3f normal, Vector3f normalOut) {
 	normalOut.set(
-	    (float)(m00 * normal.x + m01 * normal.y + m02 * normal.z),
-	    (float)(m10 * normal.x + m11 * normal.y + m12 * normal.z),
-	    (float)(m20 * normal.x + m21 * normal.y + m22 * normal.z)
+	    (float)(m00 * normal.x + m10 * normal.y + m20 * normal.z),
+	    (float)(m01 * normal.x + m11 * normal.y + m21 * normal.z),
+	    (float)(m02 * normal.x + m12 * normal.y + m22 * normal.z)
 	    );
     }
 
@@ -1936,10 +2065,10 @@ public class Matrix4d implements Serializable {
     /**
       * Sets 16 values	
       */
-    private void set(double m00, double m01, double m02, double m03, 
-		  double m10, double m11, double m12, double m13,
-		  double m20, double m21, double m22, double m23,
-		  double m30, double m31, double m32, double m33) {
+    private void set(double m00, double m10, double m20, double m30, 
+    		double m01, double m11, double m21, double m31,
+    		double m02, double m12, double m22, double m32,
+    		double m03, double m13, double m23, double m33) {
 	this.m00 = m00; this.m01 = m01; this.m02 = m02; this.m03 = m03;
 	this.m10 = m10; this.m11 = m11; this.m12 = m12; this.m13 = m13;
 	this.m20 = m20; this.m21 = m21; this.m22 = m22; this.m23 = m23;
@@ -1966,45 +2095,18 @@ public class Matrix4d implements Serializable {
 	    )/3.0
 	    );
 
+	// zero-div may occur.
+	double t = (s == 0.0f ? 0.0f : 1.0f/s);
+
 	if (rot3 != null) {
 	    this.getRotationScale(rot3);
-
-        // zero-div may occur.
-        double n = 1/Math.sqrt(m00*m00 + m10*m10 + m20*m20);
-        rot3.m00 *= n;
-        rot3.m10 *= n;
-        rot3.m20 *= n;
-
-        n = 1/Math.sqrt(m01*m01 + m11*m11 + m21*m21);
-        rot3.m01 *= n;
-        rot3.m11 *= n;
-        rot3.m21 *= n;
-
-        n = 1/Math.sqrt(m02*m02 + m12*m12 + m22*m22);
-        rot3.m02 *= n;
-        rot3.m12 *= n;
-        rot3.m22 *= n;
+	    rot3.mul(t);
 	}
 
 	if (rot4 != null) {
 	    if (rot4 != this)
-            rot4.setRotationScale(this);  // private method
-
-        // zero-div may occur.
-        double n = 1/Math.sqrt(m00*m00 + m10*m10 + m20*m20);
-        rot4.m00 *= n;
-        rot4.m10 *= n;
-        rot4.m20 *= n;
-
-        n = 1/Math.sqrt(m01*m01 + m11*m11 + m21*m21);
-        rot4.m01 *= n;
-        rot4.m11 *= n;
-        rot4.m21 *= n;
-
-        n = 1/Math.sqrt(m02*m02 + m12*m12 + m22*m22);
-        rot4.m02 *= n;
-        rot4.m12 *= n;
-        rot4.m22 *= n;
+		rot4.setRotationScale(this);  // private method
+	    rot4.mulRotationScale(t);         // private method
 	}
 
 	return s;
@@ -2066,54 +2168,62 @@ public class Matrix4d implements Serializable {
       * @param trans the translational component
       */
     private void setTranslation(Vector3f trans) {
-	m03 = trans.x;
-        m13 = trans.y;  
-	m23 = trans.z;
+		m30 = trans.x;
+	    m31 = trans.y;  
+		m32 = trans.z;
     }
     private void setFromQuat(double x, double y, double z, double w) {
-	double n = x*x + y*y + z*z + w*w;
-	double s = (n > 0.0) ? (2.0/n) : 0.0;
+    	double n = x*x + y*y + z*z + w*w;
+    	double s = (n > 0.0) ? (2.0/n) : 0.0;
 
-	double xs = x*s,  ys = y*s,  zs = z*s;
-	double wx = w*xs, wy = w*ys, wz = w*zs;
-	double xx = x*xs, xy = x*ys, xz = x*zs;
-	double yy = y*ys, yz = y*zs, zz = z*zs;
+    	double xs = x*s,  ys = y*s,  zs = z*s;
+    	double wx = w*xs, wy = w*ys, wz = w*zs;
+    	double xx = x*xs, xy = x*ys, xz = x*zs;
+    	double yy = y*ys, yz = y*zs, zz = z*zs;
 
-	setIdentity();
-	m00 = 1.0 - (yy + zz);	m01 = xy - wz;         m02 = xz + wy;
-	m10 = xy + wz;          m11 = 1.0 - (xx + zz); m12 = yz - wx;
-	m20 = xz - wy;          m21 = yz + wx;         m22 = 1.0 - (xx + yy);
+    	setIdentity();
+    	m00 = 1.0 - (yy + zz);	m10 = xy - wz;         m20 = xz + wy;
+    	m01 = xy + wz;         m11 = 1.0 - (xx + zz); m21 = yz - wx;
+    	m02 = xz - wy;         m12 = yz + wx;         m22 = 1.0 - (xx + yy);
     }
+
     private void setFromAxisAngle(double x, double y, double z, double angle) {
-	// Taken from Rick's which is taken from Wertz. pg. 412
-	// Bug Fixed and changed into right-handed by hiranabe
-	double n = Math.sqrt(x*x + y*y + z*z);
-	// zero-div may occur
-	n = 1/n;
-	x *= n;
-	y *= n;
-	z *= n;
-	double c = Math.cos(angle);
-	double s = Math.sin(angle);
-	double omc = 1.0 - c;
-	m00 = c + x*x*omc;
-	m11 = c + y*y*omc;
-	m22 = c + z*z*omc;
+    	// Taken from Rick's which is taken from Wertz. pg. 412
+    	// Bug Fixed and changed into right-handed by hiranabe
+    	double n = Math.sqrt(x*x + y*y + z*z);
+    	// zero-div may occur
+    	n = 1/n;
+    	x *= n;
+    	y *= n;
+    	z *= n;
+    	double c = Math.cos(angle);
+    	double s = Math.sin(angle);
+    	double omc = 1.0 - c;
 
-	double tmp1 = x*y*omc;
-	double tmp2 = z*s;
-	m01 = tmp1 - tmp2;
-	m10 = tmp1 + tmp2;
+    	m00 = c + x*x*omc;
+    	m11 = c + y*y*omc;
+    	m22 = c + z*z*omc;
 
-	tmp1 = x*z*omc;
-	tmp2 = y*s;
-	m02 = tmp1 + tmp2;
-	m20 = tmp1 - tmp2;
+    	double tmp1 = x*y*omc;
+    	double tmp2 = z*s;
+    	m10 = tmp1 - tmp2;
+    	m01 = tmp1 + tmp2;
 
-	tmp1 = y*z*omc;
-	tmp2 = x*s;
-	m12 = tmp1 - tmp2;
-	m21 = tmp1 + tmp2;
+    	tmp1 = x*z*omc;
+    	tmp2 = y*s;
+    	m20 = tmp1 + tmp2;
+    	m02 = tmp1 - tmp2;
+
+    	tmp1 = y*z*omc;
+    	tmp2 = x*s;
+    	m21 = tmp1 - tmp2;
+    	m12 = tmp1 + tmp2;
     }
 
+	public Vector3d translationVector() {
+		Vector3d translation = new Vector3d();
+		get(translation);
+		return translation;
+	}
+    
 }

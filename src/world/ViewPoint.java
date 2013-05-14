@@ -2,7 +2,9 @@ package world;
 import org.lwjgl.opengl.Display;
 
 import misc.MathF;
+import vecmath.Matrix4d;
 import vecmath.Matrix4f;
+import vecmath.Vector3d;
 import vecmath.Vector3f;
 
 
@@ -58,13 +60,13 @@ public class ViewPoint extends WorldObject {
 
 	}
 	
-	public Matrix4f getTransformationMatrix() {
+	public Matrix4d getTransformationMatrix() {
 		
-		Matrix4f transformation = new Matrix4f();
+		Matrix4d transformation = new Matrix4d();
 		
-		float ox;
-		float oy;
-		float oz;
+		double ox;
+		double oy;
+		double oz;
 		
 		synchronized (orientation) {
 			ox = orientation.x;
@@ -76,9 +78,9 @@ public class ViewPoint extends WorldObject {
 		transformation.rotY(-oy);
 		transformation.rotZ(-oz);
 		
-		Vector3f negativePosition = new Vector3f();
+		Vector3d negativePosition = new Vector3d();
 		
-		synchronized (negativePosition) {
+		synchronized (position) {
 			negativePosition.set(position);
 		}
 		negativePosition.negate();

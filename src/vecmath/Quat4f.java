@@ -361,7 +361,7 @@ public class Quat4f extends Tuple4f implements Serializable {
       * @param q1 the other quaternion
       * @param alpha the alpha interpolation parameter
       */
-    public final void interpolate(Quat4f q1, double alpha) {
+    public final void slerp(Quat4f q1, double alpha) {
 	// From Hoggar.
 	normalize();
 	double n1 = Math.sqrt(q1.norm());
@@ -404,9 +404,9 @@ public class Quat4f extends Tuple4f implements Serializable {
       * @param q2 the second quaternion
       * @param alpha the alpha interpolation parameter
       */
-    public final void interpolate(Quat4f q1, Quat4f q2, double alpha) {
+    public final void slerp(Quat4f q1, Quat4f q2, double alpha) {
 	set(q1);
-	interpolate(q2, alpha);
+	slerp(q2, alpha);
     }
 
     // helper method
@@ -450,5 +450,18 @@ public class Quat4f extends Tuple4f implements Serializable {
 		w = (float)((m10 - m01)*s);
 	    }
 	}
+    }
+    
+    public void rotate(Vector3f v) {
+    	v.normalize();
+         	
+	    float x = v.x*w - v.y*z + v.z*y;
+	    float y = v.y*w - v.z*x + v.x*z;
+	    float z = v.z*w - v.x*y + v.y*x;
+	    float w = v.x*x + v.y*y + v.z*z;
+	    
+	    v.x = this.x*w + this.w*x + this.y*z - this.z*y;
+	    v.y = this.y*w + this.w*y + this.z*x - this.x*z;
+	    v.z = this.z*w + this.w*z + this.x*y - this.y*x;    	     
     }
 }

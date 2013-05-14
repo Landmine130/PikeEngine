@@ -20,14 +20,13 @@ out mediump vec2 textureCoordinatePass;
 
 void main()
 {
-    vec3 eyeNormal = normalize(normalMatrix * normal);
-    vec3 lightPosition = vec3(0.0, 1.0, 0.0);
+    //vec3 eyeNormal = normalize(normalMatrix * normal);
+    //vec3 lightPosition = vec3(0.0, 1.0, 0.0);
     vec4 diffuseColor = vec4(1, 1, 1, 1.0);
     
-    float nDotVP = max(1, dot(eyeNormal, normalize(lightPosition)));
-    colorPass = diffuseColor * nDotVP;
+    //float nDotVP = max(1, dot(eyeNormal, normalize(lightPosition)));
+    colorPass = diffuseColor;// * nDotVP;
     
     gl_Position = modelViewProjectionMatrix * position;
-	
 	textureCoordinatePass = textureCoordinateIn;
 }

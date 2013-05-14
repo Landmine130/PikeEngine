@@ -11,6 +11,7 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.glVertexAttribIPointer;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -24,25 +25,31 @@ import org.lwjgl.BufferUtils;
 
 public class RiggedModel extends Model {
 
-    private static final HashMap<String, RiggedModel> loadedModels = new HashMap<String, RiggedModel>();
+    private static final HashMap<String, RiggedModel[]> loadedModels = new HashMap<String, RiggedModel[]>();
 	
 	public static final String ELEMENT_PATH_EXTENSION = ".elements";
 	public static final int WEIGHTS_PER_VERTEX = 4;
 
-	public static RiggedModel getRiggedModel(String modelName, String animationName, boolean textured) {
+	public static RiggedModel[] getRiggedModels(String modelName, boolean textured) {
 		modelName = MODELDATA_PATH + modelName;
-		RiggedModel m = loadedModels.get(modelName);
+		RiggedModel[] m = loadedModels.get(modelName);
 		if (m == null) {
-			m = new RiggedModel(modelName, textured, Animation.getAnimationForName(animationName));
+			
+			
+			// To be implemented
+			
+			
+			//m = new RiggedModel(modelName, textured);
 			loadedModels.put(modelName, m);
 		}
-		else {
-			m = new RiggedModel(m);
+		RiggedModel[] m2 = new RiggedModel[m.length];
+		for (int i = 0; i < m.length; i++) {
+			m2[i] = m[i];
 		}
-		return m;
+		return m2;
 	}
 	
-	public static void addLoadedModel(String path, RiggedModel m) {
+	public static void addLoadedModelArray(String path, RiggedModel[] m) {
 		loadedModels.put(path, m);
 	}
 	
@@ -56,21 +63,19 @@ public class RiggedModel extends Model {
 	}
 	
 	
-	private volatile Animation animation = null;
 	private ByteBuffer elementData;
 	private int elementCount;
 	private int elementBuffer;
 	
-	public RiggedModel(String path, boolean textured, Animation a) {
+	public RiggedModel(String path, boolean textured) {
 		super(path, textured);
-		animation = a;
 	}
 
-	public RiggedModel(ByteBuffer data, ByteBuffer elementData, Texture texture, int vertexCount, int elementCount, Animation a) {
+	public RiggedModel(ByteBuffer data, ByteBuffer elementData, Texture texture, int vertexCount, int elementCount) {
 		super(data, texture, vertexCount);
 		this.elementData = elementData;
 		this.elementCount = elementCount;
-		animation = a;
+		init();
 	}
 
 	public RiggedModel(RiggedModel m) {
@@ -78,7 +83,6 @@ public class RiggedModel extends Model {
 		elementData = m.elementData;
 		elementCount = m.elementCount;
 		elementBuffer = m.elementBuffer;
-		animation = new Animation(m.animation);
 	}
 
 	public RiggedModel(byte[] data, byte[] elementData, Texture texture, int vertexCount, int elementCount, Animation a) {
@@ -87,19 +91,7 @@ public class RiggedModel extends Model {
 		this.elementData.put(elementData);
 		this.elementData.flip();
 		this.elementCount = elementCount;
-		animation = a;
-	}
-	
-	public void setAnimation(Animation a) {
-		animation = a;
-	}
-	
-	public void setAnimation(String name) {
-		animation = Animation.getAnimationForName(name);
-	}
-	
-	public Animation getAnimation() {
-		return animation;
+		init();
 	}
 	
 	public int getElementCount() {
@@ -110,51 +102,50 @@ public class RiggedModel extends Model {
 		return elementBuffer;
 	}
 	
-	public float getRadius() {
-		return animation.getRadius();
-	}
-	
 	protected void init() {
-		try {
-			vertexArray = glGenVertexArrays();
-			glBindVertexArray(vertexArray);
+		
+		if (elementData != null) {
 			
-			buffer = glGenBuffers();
-			glBindBuffer(GL_ARRAY_BUFFER, buffer);
-			glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
-			
-			glEnableVertexAttribArray(RiggedShader.WEIGHT1_ATTRIBUTE_LOCATION);
-			glEnableVertexAttribArray(RiggedShader.WEIGHT2_ATTRIBUTE_LOCATION);
-			glEnableVertexAttribArray(RiggedShader.WEIGHT3_ATTRIBUTE_LOCATION);
-			glEnableVertexAttribArray(RiggedShader.WEIGHT4_ATTRIBUTE_LOCATION);
-			
-			glEnableVertexAttribArray(RiggedShader.BONE_INDEX_ATTRIBUTE_LOCATION);
-			glEnableVertexAttribArray(RiggedShader.BIAS_ATTRIBUTE_LOCATION);
+			try {
+				vertexArray = glGenVertexArrays();
+				glBindVertexArray(vertexArray);
+				
+				buffer = glGenBuffers();
+				glBindBuffer(GL_ARRAY_BUFFER, buffer);
+				glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
+				
+				glEnableVertexAttribArray(RiggedShader.WEIGHT1_ATTRIBUTE_LOCATION);
+				glEnableVertexAttribArray(RiggedShader.WEIGHT2_ATTRIBUTE_LOCATION);
+				glEnableVertexAttribArray(RiggedShader.WEIGHT3_ATTRIBUTE_LOCATION);
+				glEnableVertexAttribArray(RiggedShader.WEIGHT4_ATTRIBUTE_LOCATION);
+				
+				glEnableVertexAttribArray(RiggedShader.JOINT_INDEX_ATTRIBUTE_LOCATION);
+				glEnableVertexAttribArray(RiggedShader.BIAS_ATTRIBUTE_LOCATION);
+	
+				glEnableVertexAttribArray(RiggedShader.NORMAL_ATTRIBUTE_LOCATION);
+				glEnableVertexAttribArray(RiggedShader.TEXTURE_COORDINATE_ATTRIBUTE_LOCATION);
+				
+				glVertexAttribPointer(RiggedShader.WEIGHT1_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 0);
+				glVertexAttribPointer(RiggedShader.WEIGHT2_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 12);
+				glVertexAttribPointer(RiggedShader.WEIGHT3_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 24);
+				glVertexAttribPointer(RiggedShader.WEIGHT4_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 36);
+	
+				glVertexAttribIPointer(RiggedShader.JOINT_INDEX_ATTRIBUTE_LOCATION, 4, GL_UNSIGNED_BYTE, 88, 48);
+				glVertexAttribPointer(RiggedShader.BIAS_ATTRIBUTE_LOCATION, 4, GL_FLOAT, false, 88, 52);
+	
+				glVertexAttribPointer(RiggedShader.NORMAL_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 68);
+				glVertexAttribPointer(RiggedShader.TEXTURE_COORDINATE_ATTRIBUTE_LOCATION, 2, GL_FLOAT, false, 88, 80);
+				
+				elementBuffer = glGenBuffers();
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementData, GL_STATIC_DRAW);
 
-			glEnableVertexAttribArray(RiggedShader.NORMAL_ATTRIBUTE_LOCATION);
-			glEnableVertexAttribArray(RiggedShader.TEXTURE_COORDINATE_ATTRIBUTE_LOCATION);
-			
-			glVertexAttribPointer(RiggedShader.WEIGHT1_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 0);
-			glVertexAttribPointer(RiggedShader.WEIGHT2_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 12);
-			glVertexAttribPointer(RiggedShader.WEIGHT3_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 24);
-			glVertexAttribPointer(RiggedShader.WEIGHT4_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 36);
-
-			glVertexAttribPointer(RiggedShader.BONE_INDEX_ATTRIBUTE_LOCATION, 4, GL_BYTE, false, 88, 48);
-			glVertexAttribPointer(RiggedShader.BIAS_ATTRIBUTE_LOCATION, 4, GL_FLOAT, false, 88, 52);
-
-			glVertexAttribPointer(RiggedShader.NORMAL_ATTRIBUTE_LOCATION, 3, GL_FLOAT, false, 88, 68);
-			glVertexAttribPointer(RiggedShader.TEXTURE_COORDINATE_ATTRIBUTE_LOCATION, 2, GL_FLOAT, false, 88, 80);
-			
-			elementBuffer = glGenBuffers();
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementData, GL_STATIC_DRAW);
-			
-			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindVertexArray(0);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

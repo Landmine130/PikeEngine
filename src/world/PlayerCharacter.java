@@ -6,20 +6,21 @@ import java.util.HashSet;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-import vecmath.Vector3f;
+import vecmath.Vector3d;
 import vecmath.Vector3i;
 import world.terrain.Terrain;
 
 import misc.InputHandler;
 import misc.InputObserver;
-import misc.MathF;
 
 public class PlayerCharacter extends Character implements InputObserver, WorldObjectMovementObserver {
 	
+	private static final double PI_OVER_2 = Math.PI / 2;
+	
 	private ViewPoint viewPoint;
 	
-	private float movementSpeed = 2.5f;
-	private int viewDistance = 50;
+	private double movementSpeed = 2.5f;
+	private int viewDistance = 5;
 	private HashSet<Vector3i> loadedObjects = new HashSet<Vector3i>();
 	private HashSet<Vector3i> accessedPositions = new HashSet<Vector3i>();
 
@@ -59,7 +60,7 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 	
 	private Vector3i oldPosition;
 		
-	public void setPosition(Vector3f position) {
+	public void setPosition(Vector3d position) {
 		super.setPosition(position);
 		viewPoint.setPosition(position);
 		
@@ -88,7 +89,7 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 		int radiusSquared = viewDistance * viewDistance;
 		
 		for (positionCopy.x = xMin; positionCopy.x <= xMax; positionCopy.x++) {
-			zDistance = (int)MathF.sqrt(radiusSquared - (positionCopy.x - position.x) * (positionCopy.x - position.x));
+			zDistance = (int)Math.sqrt(radiusSquared - (positionCopy.x - position.x) * (positionCopy.x - position.x));
 			zMin = position.z - zDistance;
 			zMax = position.z + zDistance;
 			for (positionCopy.z = zMin; positionCopy.z <= zMax; positionCopy.z++) {
@@ -118,7 +119,7 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 		accessedPositions = swap;
 	}
 	
-	public void worldObjectWillMove(WorldObject o, Vector3f newPosition) {
+	public void worldObjectWillMove(WorldObject o, Vector3d newPosition) {
 		
 	}
 	
@@ -126,12 +127,12 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 		
 	}
 	
-	public void worldObjectWillRotate(WorldObject o, Vector3f newOrientation) {
-		if (newOrientation.x < -MathF.PI_OVER_2) {
-			newOrientation.set(-MathF.PI_OVER_2, newOrientation.y, newOrientation.z);
+	public void worldObjectWillRotate(WorldObject o, Vector3d newOrientation) {
+		if (newOrientation.x < -PI_OVER_2) {
+			newOrientation.set(-PI_OVER_2, newOrientation.y, newOrientation.z);
 		}
-		if (newOrientation.x > MathF.PI_OVER_2) {
-			newOrientation.set(MathF.PI_OVER_2, newOrientation.y, newOrientation.z);
+		if (newOrientation.x > PI_OVER_2) {
+			newOrientation.set(PI_OVER_2, newOrientation.y, newOrientation.z);
 		}
 	}
 	
@@ -141,24 +142,24 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 	
 	private void recalculateSpeed() {
 		
-		float xSpeed = 0;
-		float zSpeed = 0;
+		double xSpeed = 0;
+		double zSpeed = 0;
 
 		if (Keyboard.isKeyDown(Keyboard.KEY_W) && !Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			zSpeed = MathF.sin(-viewPoint.getOrientation().y + MathF.PI_OVER_2) * movementSpeed;
-			xSpeed = MathF.cos(-viewPoint.getOrientation().y + MathF.PI_OVER_2) * movementSpeed;
+			zSpeed = Math.sin(-viewPoint.getOrientation().y + PI_OVER_2) * movementSpeed;
+			xSpeed = Math.cos(-viewPoint.getOrientation().y + PI_OVER_2) * movementSpeed;
 		}
 		else if (Keyboard.isKeyDown(Keyboard.KEY_S) && !Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			zSpeed = MathF.sin(-viewPoint.getOrientation().y - MathF.PI_OVER_2) * movementSpeed;
-			xSpeed = MathF.cos(-viewPoint.getOrientation().y - MathF.PI_OVER_2) * movementSpeed;
+			zSpeed = Math.sin(-viewPoint.getOrientation().y - PI_OVER_2) * movementSpeed;
+			xSpeed = Math.cos(-viewPoint.getOrientation().y - PI_OVER_2) * movementSpeed;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_D) && !Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			zSpeed += MathF.sin(-viewPoint.getOrientation().y) * movementSpeed;
-			xSpeed += MathF.cos(-viewPoint.getOrientation().y) * movementSpeed;
+			zSpeed += Math.sin(-viewPoint.getOrientation().y) * movementSpeed;
+			xSpeed += Math.cos(-viewPoint.getOrientation().y) * movementSpeed;
 		}
 		else if (Keyboard.isKeyDown(Keyboard.KEY_A) && !Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			zSpeed += MathF.sin(-viewPoint.getOrientation().y + MathF.PI) * movementSpeed;
-			xSpeed += MathF.cos(-viewPoint.getOrientation().y + MathF.PI) * movementSpeed;
+			zSpeed += Math.sin(-viewPoint.getOrientation().y + Math.PI) * movementSpeed;
+			xSpeed += Math.cos(-viewPoint.getOrientation().y + Math.PI) * movementSpeed;
 		}
 		setXSpeed(xSpeed);
 		setZSpeed(zSpeed);
@@ -177,7 +178,7 @@ public class PlayerCharacter extends Character implements InputObserver, WorldOb
 	}
 	
 	public void mouseMoved(int x, int y, int dx, int dy) {
-		viewPoint.rotate(new Vector3f(-MathF.toRadians(dy / 6.0f), MathF.toRadians(dx / 6.0f), 0));
+		viewPoint.rotate(new Vector3d(-Math.toRadians(dy / 6.0f), Math.toRadians(dx / 6.0f), 0));
 		recalculateSpeed();
 	}
 	

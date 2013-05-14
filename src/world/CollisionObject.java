@@ -1,14 +1,13 @@
 package world;
 
 import java.util.TreeSet;
-
-import vecmath.Vector3f;
+import vecmath.Vector3d;
 
 public class CollisionObject extends WorldObject {
 	
 	private TreeSet<CollisionObject> collidableObjects = new TreeSet<CollisionObject>();
 	private TreeSet<CollisionObserver> collisionObservers = new TreeSet<CollisionObserver>();;
-	private float collisionRadius;
+	private double collisionRadius;
 	
 	
 	public CollisionObject() {
@@ -16,7 +15,7 @@ public class CollisionObject extends WorldObject {
 		collisionRadius = 0;
 	}
 
-	public CollisionObject(float collisionRadius) {
+	public CollisionObject(double collisionRadius) {
 
 		this.collisionRadius = collisionRadius;
 	}
@@ -38,7 +37,7 @@ public class CollisionObject extends WorldObject {
 		collisionObservers.remove(o);
 	}
 
-	private boolean checkCollision(Vector3f newPosition) {
+	private boolean checkCollision(Vector3d newPosition) {
 		
 		boolean collisionOccured = false;
 		
@@ -54,7 +53,7 @@ public class CollisionObject extends WorldObject {
 		return collisionOccured;
 	}
 
-	private void notifyObserversOfCollision(CollisionObject o, Vector3f newPosition) {
+	private void notifyObserversOfCollision(CollisionObject o, Vector3d newPosition) {
 		
 		super.move(collision(o, getPosition(), newPosition));
 		
@@ -63,7 +62,7 @@ public class CollisionObject extends WorldObject {
 		}
 	}
 
-	public void setPosition(Vector3f position) {
+	public void setPosition(Vector3d position) {
 				
 		if (!getPosition().equals(position) && !checkCollision(position)) {
 			super.setPosition(position);	
@@ -77,9 +76,9 @@ public class CollisionObject extends WorldObject {
 	 * @param newPosition The position of this object that this object was moving to
 	 * @return The new position of this object relative to oldPosition
 	 */
-	public Vector3f collision(CollisionObject o, Vector3f oldPosition, Vector3f newPosition) {
+	public Vector3d collision(CollisionObject o, Vector3d oldPosition, Vector3d newPosition) {
 
-		Vector3f movement = new Vector3f();
+		Vector3d movement = new Vector3d();
 		movement.sub(newPosition, oldPosition);
 		movement.normalize();
 		movement.scale(getPosition().distance(o.getPosition()) - o.collisionRadius - collisionRadius);

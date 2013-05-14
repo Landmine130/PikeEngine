@@ -62,7 +62,9 @@ public class Vector3d extends Tuple3d implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 6976074829889438230L;
-
+	public static final Vector3d X_UNIT_VECTOR = new Vector3d(1,0,0);
+	public static final Vector3d Y_UNIT_VECTOR = new Vector3d(0,1,0);
+	public static final Vector3d Z_UNIT_VECTOR = new Vector3d(0,0,1);
 
 
 	/**
@@ -80,9 +82,13 @@ public class Vector3d extends Tuple3d implements Serializable {
       * @param v the array of length 3 containing xyz in order
       */
     public Vector3d(double v[]) {
-	super(v);
+    	super(v);
     }
-
+    
+    public Vector3d(Tuple3i v) {
+    	super(v);
+    }
+    
     /**
       * Constructs and initializes a Vector3d from the specified Vector3f.
       * @param v1 the Vector3d containing the initialization x y z data
@@ -194,15 +200,29 @@ public class Vector3d extends Tuple3d implements Serializable {
       * @return the angle in radians in the range [0,PI]
       */
     public final double angle(Vector3d v1) {
-	// return (double)Math.acos(dot(v1)/v1.length()/v.length());
-	// Numerically, near 0 and PI are very bad condition for acos.
-	// In 3-space, |atan2(sin,cos)| is much stable.
-
-	double xx = y*v1.z - z*v1.y;
-	double yy = z*v1.x - x*v1.z;
-	double zz = x*v1.y - y*v1.x;
-	double cross = Math.sqrt(xx*xx + yy*yy + zz*zz);
-
-	return Math.abs(Math.atan2(cross, dot(v1)));
+		// return (double)Math.acos(dot(v1)/v1.length()/v.length());
+		// Numerically, near 0 and PI are very bad condition for acos.
+		// In 3-space, |atan2(sin,cos)| is much stable.
+	
+		double xx = y*v1.z - z*v1.y;
+		double yy = z*v1.x - x*v1.z;
+		double zz = x*v1.y - y*v1.x;
+		double cross = Math.sqrt(xx*xx + yy*yy + zz*zz);
+	
+		return Math.abs(Math.atan2(cross, dot(v1)));
+    }
+    
+    public float distance(Vector3d v1) {
+    	Vector3d difference = new Vector3d();
+    	difference.sub(this, v1);
+    	return (float)Math.sqrt(difference.x * difference.x + difference.y * difference.y + difference.z * difference.z);
+    }
+    
+    public double innerProduct(Vector3d v) {
+    	return x * v.x + y * v.y + z * v.z;
+    }
+    
+    public final Vector3i toVector3i() {
+    	return new Vector3i(this);
     }
 }

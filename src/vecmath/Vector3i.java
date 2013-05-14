@@ -39,9 +39,13 @@ public class Vector3i extends Tuple3i implements Serializable {
 	super();
    }
 
-   public Vector3i(Vector3f v) {
+   public Vector3i(Tuple3f v) {
 	   super(v);
-}
+   }
+   
+   public Vector3i(Tuple3d v) {
+	   super(v);
+   }
 
 /**
      * Returns the squared length of this vector.

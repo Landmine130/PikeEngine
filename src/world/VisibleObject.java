@@ -11,6 +11,7 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import vecmath.Matrix3f;
 import vecmath.Matrix4f;
+import vecmath.Matrix4d;
 
 
 public class VisibleObject extends WorldObject implements Drawable {
@@ -79,18 +80,21 @@ public class VisibleObject extends WorldObject implements Drawable {
 	public void prepareToDrawInWorld(World world) {
 		ViewPoint viewPoint = world.getViewPoint();
 		
-		Matrix4f modelViewProjectionMatrix = getTransformationMatrix();
+		Matrix4d modelViewProjectionMatrix = getTransformationMatrix();
 		modelViewProjectionMatrix.mul(viewPoint.getTransformationMatrix(), modelViewProjectionMatrix);
-		inView = viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector());
+		Matrix4f modelViewProjectionMatrixF = new Matrix4f(modelViewProjectionMatrix);
+		
+		inView = viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrixF.translationVector());
 		if (inView) {
+						
 			Matrix3f normalMatrix = new Matrix3f();
-			modelViewProjectionMatrix.get(normalMatrix);
+			modelViewProjectionMatrixF.get(normalMatrix);
 			normalMatrix.invert();
 			normalMatrix.transpose();
 			
-			modelViewProjectionMatrix.mul(viewPoint.getProjectionMatrix(), modelViewProjectionMatrix);
+			modelViewProjectionMatrixF.mul(viewPoint.getProjectionMatrix(), modelViewProjectionMatrixF);
 			
-			modelViewProjectionMatrix.store(modelViewProjectionBuffer);
+			modelViewProjectionMatrixF.store(modelViewProjectionBuffer);
 			modelViewProjectionBuffer.flip();
 			normalMatrix.store(normalBuffer);
 			normalBuffer.flip();

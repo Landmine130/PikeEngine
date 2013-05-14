@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 
+import misc.Md5ToModeldata;
 import misc.Timer;
 import vecmath.Matrix4f;
 import vecmath.Quat4f;
@@ -14,7 +15,7 @@ public class Animation {
 	
 	public static final int MAX_JOINTS = 40;
 	
-	public static final String ANIMATIONDATA_PATH = "Resources/Models/Animations/";
+	public static final String ANIMATIONDATA_PATH = "Resources/Models/Animaitons/";
 	public static final String ANIMATION_FILE_EXTENSION = ".animationdata";
 
 	public static final HashMap<String, Animation> loadedAnimations = new HashMap<String, Animation>();
@@ -27,8 +28,8 @@ public class Animation {
 		Animation a = loadedAnimations.get(path);
 		
 		if (a == null) {
-			
-			File file = new File(name);
+						
+			File file = new File(path);
 			long dataSize = file.length() / FLOAT_BYTE_COUNT - HEADER_SIZE;
 			try {
 				 DataInputStream reader = new DataInputStream(new FileInputStream(file));
@@ -37,10 +38,11 @@ public class Animation {
 				int frameCount = reader.readInt();
 				int jointCount = reader.readInt();
 
-				Matrix4f[][] frames = new Matrix4f[jointCount][frameCount];
+				Vector3f[][] positionFrames = new Vector3f[frameCount][jointCount];
+				Quat4f[][] orientationFrames = new Quat4f[frameCount][jointCount];
+				
 				int[] parentJointIndexes = new int[jointCount];
 				float[] frameRadii = new float[frameCount];
-				Matrix4f rotationMatrix = new Matrix4f();
 
 				for (int i = 0; i < frameCount; i++) {
 					
@@ -49,36 +51,41 @@ public class Animation {
 					int parsedFloats = i * jointCount;
 					
 					for (int j = 0; j < jointCount && parsedFloats + j < dataSize; j++) {
-						Vector3f position = new Vector3f(reader.readFloat(), reader.readFloat(), reader.readFloat());
+						positionFrames[i][j] = new Vector3f(reader.readFloat(), reader.readFloat(), reader.readFloat());
 						float ox = reader.readFloat();
 						float oy = reader.readFloat();
 						float oz = reader.readFloat();
 						// possible optimization: Calculate ow instead of reading from file
 						float ow = reader.readFloat();
-						Quat4f orientation = new Quat4f(ox, oy, oz, ow);
-						Matrix4f m = new Matrix4f(position);
-						rotationMatrix.set(orientation);
-						m.mul(rotationMatrix);
-						frames[i][j] = m;
+						orientationFrames[i][j] = new Quat4f(ox, oy, oz, ow);
 					}
+				}
+				
+				for (int i = 0; i < jointCount; i++) {
+					parentJointIndexes[i] = reader.readInt();
 				}
 				reader.close();
 
-				a = new Animation(frames, parentJointIndexes, frameRadii, 1.0f / fps);
+				a = new Animation(positionFrames, orientationFrames, parentJointIndexes, frameRadii, 1.0f / fps);
 				loadedAnimations.put(path, a);
 			}
 			catch (Exception e) {
 				System.err.println("Error: could not read file " + path);
 				e.printStackTrace();
+				return null;
 			}
 		}
+		a = new Animation(a);
 		return a;
 	}
 	
 	
-	private volatile float startTime = (float)Timer.getTime();
+	private volatile double startTime = Timer.getTime();
+	private volatile boolean running = false;
+	private volatile double stopTime;
 	private float frameLength;
-	private Matrix4f[][] frames;
+	private Vector3f[][] positionFrames;
+	private Quat4f[][] orientationFrames;
 	private int[] parentJointIndexes;
 	private float[] frameRadii;
 	
@@ -88,32 +95,56 @@ public class Animation {
 	 * @param parentJointIndexes an array which specifies the index of the parent for each Matrix4f in a frame
 	 * @param frameLength the duration of a single frame in seconds
 	 */
-	public Animation(Matrix4f[][] frames, int[] parentJointIndexes, float[] frameRadii, float frameLength) {
-		this.frames = frames;
+	public Animation(Vector3f[][] positionFrames, Quat4f[][] orientationFrames, int[] parentJointIndexes, float[] frameRadii, float frameLength) {
+		this.positionFrames = positionFrames;
+		this.orientationFrames = orientationFrames;
 		this.parentJointIndexes = parentJointIndexes;
 		this.frameLength = frameLength;
 		this.frameRadii = frameRadii;
 	}
 	
 	public Animation(Animation a) {
-		this.frames = a.frames;
-		this.parentJointIndexes = a.parentJointIndexes;
+		this.positionFrames = a.positionFrames;
+		this.orientationFrames = a.orientationFrames;		this.parentJointIndexes = a.parentJointIndexes;
 		this.frameLength = a.frameLength;
 		this.frameRadii = a.frameRadii;
 	}
 	
-	public float getTime() {
-		return (float)Timer.getTime() - startTime;
+	public double getTime() {
+		if (running) {
+			setTime(Timer.getTime() - startTime);
+			return Timer.getTime() - startTime;
+		}
+		else {
+			return stopTime;
+		}
 	}
 	
-	public void setTime(float time) {
-		startTime = (float)Timer.getTime() - time;
+	public void setTime(double time) {
+		double length = frameLength * getFrameCount();
+		time = time % length;
+		startTime = Timer.getTime() - time;
+		stopTime = time;
 	}
 	
-	public float getRadius(float animationTime) {
+	public void start() {
+		setTime(stopTime);
+		running = true;
+	}
+	
+	public void stop() {
+		stopTime = getTime();
+		running = false;
+	}
+	
+	public void reset() {
+		setTime(0);
+	}
+	
+	public float getRadius(double animationTime) {
 		
-		float currentFrame = animationTime * frameLength;
-		int currentIndex = Math.abs((int) currentFrame % getFrameCount());
+		double currentFrame = animationTime / frameLength;
+		int currentIndex = (int) currentFrame;
 		int nextIndex = (currentIndex + 1) % getFrameCount();
 		
 		float currentFrameRadius = frameRadii[currentIndex];
@@ -127,11 +158,11 @@ public class Animation {
 	}
 	
 	public int getFrameCount() {
-		return frames.length;
+		return positionFrames.length;
 	}
 	
 	public int getBoneCount() {
-		return frames[0].length;
+		return positionFrames[0].length;
 	}
 	
 	/**
@@ -139,34 +170,43 @@ public class Animation {
 	 * @param animationTime the time since animation start that the return value is calculated for
 	 * @return the object-local positions of the bones for this animation
 	 */
-	public Matrix4f[] getJointPositions(float animationTime) {
+	public Matrix4f[] getJointPositions(double animationTime) {
 		
-		Matrix4f scaledNext = new Matrix4f();
-		Matrix4f scale = new Matrix4f();
+		Matrix4f m2 = new Matrix4f(); 
+
+		Vector3f interpolatedPosition = new Vector3f();
+		Quat4f interpolatedOrientation = new Quat4f();
+
+		Matrix4f[] currentPositions = new Matrix4f[getBoneCount()];
 		
-		Matrix4f[] currentPositions = new Matrix4f[getFrameCount()];
-		
-		float currentFrame = animationTime * frameLength;
-		int currentIndex = Math.abs((int) currentFrame % getFrameCount());
+		double currentFrame = animationTime / frameLength;
+		int currentIndex = (int) currentFrame;
 		int nextIndex = (currentIndex + 1) % getFrameCount();
 		
-		Matrix4f[] lastFrame = frames[currentIndex];
-		Matrix4f[] nextFrame = frames[nextIndex];
+		Vector3f[] lastFramePositions = positionFrames[currentIndex];
+		Quat4f[] lastFrameOrientations = orientationFrames[currentIndex];
+		Vector3f[] nextFramePositions = positionFrames[nextIndex];
+		Quat4f[] nextFrameOrientations = orientationFrames[nextIndex];
 		
-		float lastFrameWeight = currentFrame / currentIndex;
+		float nextFrameWeight = (float)(currentFrame - currentIndex);
 		
-		for (int i = 0; i < lastFrame.length; i++) {
+		for (int i = 0; i < lastFramePositions.length; i++) {
 			
-			Matrix4f interpolatedMatrix = new Matrix4f(lastFrame[i]);
-			scale.setScale(lastFrameWeight);
-			interpolatedMatrix.mul(scale);
+			interpolatedPosition.set(lastFramePositions[i]);
+			interpolatedOrientation.set(lastFrameOrientations[i]);
 			
-			scaledNext.set(nextFrame[i]);
-			scale.setScale(1 - lastFrameWeight);
-			scaledNext.mul(scale);
-			interpolatedMatrix.mul(scaledNext);
+			interpolatedPosition.lerp(nextFramePositions[i], nextFrameWeight);
+			interpolatedOrientation.slerp(nextFrameOrientations[i], nextFrameWeight);
 			
-			interpolatedMatrix.mul(currentPositions[parentJointIndexes[i]], interpolatedMatrix);
+			Matrix4f interpolatedMatrix = new Matrix4f(interpolatedPosition);
+			m2.set(interpolatedOrientation);
+			interpolatedMatrix.mul(m2);
+			
+			int parentIndex = parentJointIndexes[i];
+			
+			if (parentIndex >= 0) {
+				interpolatedMatrix.mul(currentPositions[parentIndex], interpolatedMatrix);
+			}
 			currentPositions[i] = interpolatedMatrix;
 		}
 		

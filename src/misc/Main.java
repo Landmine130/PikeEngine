@@ -1,16 +1,13 @@
 package misc;
 
-import java.nio.FloatBuffer;
-
 import world.terrain.*;
 import world.*;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 
-import vecmath.Vector3f;
+import vecmath.Vector3d;
 import vecmath.Vector3i;
 
 public class Main implements InputObserver {
@@ -33,12 +30,22 @@ public class Main implements InputObserver {
 		terrain.get(new Vector3i(0,0,-1));
 		terrain.load(new Vector3i(-1,0,0));
 		terrain.load(new Vector3i(-1,0,-1));*/
-
-		//world.getViewPoint().setPosition(new Vector3f(0,0,0));
-		//world.getViewPoint().setOrientation(new Vector3f(0,MathF.toRadians(0),0));
 		
+		try {
+			Md5ToModeldata.convertAnimation("Resources/Models/Animaitons/boblampclean.md5anim", "Resources/Models/Animaitons/boblampclean.animationdata");
+			Md5ToModeldata.convertMesh("Resources/Models/boblampclean.md5mesh", "boblampclean");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		RiggedObject riggedObject = new RiggedObject("boblampclean");
+		riggedObject.setPosition(new Vector3d(0,0.5,10));
+		riggedObject.getAnimation().start();
+		world.addDrawable(riggedObject);
 		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint(), world);
-		player.setPosition(new Vector3f(0f,1.5f,0f));
+		player.setPosition(new Vector3d(0,20.5,0));
 		
 		//o = new VisibleObject("cube");
 		//o.setPosition(new Vector3f(1f,0,30f));

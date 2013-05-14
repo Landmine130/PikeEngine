@@ -4,7 +4,6 @@ import misc.Timer;
 import misc.Benchmark;
 import misc.InputHandler;
 import misc.MathF;
-import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -399,7 +398,7 @@ public class World {
 			
 			int objectsPerUpdater = tempObservers.size() / updaters.length + 1;
 
-			float timeElapsed = (float)(Timer.getTime() - timeSinceLastUpdate);
+			double timeElapsed = Timer.getTime() - timeSinceLastUpdate;
 			
 			for (int i = 0; i < updaters.length; i++) {
 				
@@ -509,7 +508,7 @@ class BackgroundUpdater implements Runnable {
 	
 	private final Thread thread = new Thread(this);
 	private World world;
-	private volatile float time = 0;
+	private volatile double time = 0;
 	private boolean paused = false;
 	private boolean running = true;
 	
@@ -526,7 +525,7 @@ class BackgroundUpdater implements Runnable {
 		}
 	}
 	
-	public void setTime(float time) {
+	public void setTime(double time) {
 		this.time = time;
 	}
 	

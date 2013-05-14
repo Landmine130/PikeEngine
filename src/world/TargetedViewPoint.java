@@ -1,7 +1,6 @@
 package world;
-import vecmath.Matrix4f;
-import vecmath.Vector3f;
-
+import vecmath.Matrix4d;
+import vecmath.Vector3d;
 
 public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementObserver {
 
@@ -31,20 +30,20 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 		updatePosition();
 	}
 
-	public void rotate(Vector3f magnitude) {
+	public void rotate(Vector3d magnitude) {
 		super.rotate(magnitude);
 		
 		updatePosition();
 	}
 
-	public void setOrientation(Vector3f orientation) {
+	public void setOrientation(Vector3d orientation) {
 		super.setOrientation(orientation);
 		
 		updatePosition();
 	}
 
 	// No effect when target is set
-	public void move(Vector3f vector) {
+	public void move(Vector3d vector) {
 		
 		if (target == null) {
 			super.move(vector);
@@ -52,7 +51,7 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 	}
 
 	// No effect when target is set
-	public void setPosition(Vector3f position) {
+	public void setPosition(Vector3d position) {
 		
 		if (target == null) {
 			super.setPosition(position);
@@ -61,22 +60,36 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 
 	private void updatePosition() {
 		
-		Matrix4f newLocation = new Matrix4f(new Vector3f(0, 0, distanceFromTarget));
+		Matrix4d newLocation = new Matrix4d();
 		
-		Vector3f myOrientation = getOrientation();
+		double ox;
+		double oy;
+		double oz;
 		
-		newLocation.rotX(-myOrientation.x);
-		newLocation.rotY(-myOrientation.y);
-		newLocation.rotZ(-myOrientation.z);
-		newLocation.invert();
-		//newLocation.translate(new Vector3f(0, 0, -distanceFromTarget));
-		newLocation.mul(new Matrix4f(target.getPosition()));
+		synchronized (orientation) {
+			ox = orientation.x;
+			oy = orientation.y;
+			oz = orientation.z;
+		}
+		
+		newLocation.rotX(ox);
+		newLocation.rotY(oy);
+		newLocation.rotZ(oz);
+		
+		Vector3d negativeZ = new Vector3d();
+		
+		synchronized (negativeZ) {
+			negativeZ.set(0, 0, distanceFromTarget);
+		}
+		negativeZ.negate();
+		
+		newLocation.translate(negativeZ);
 		super.setPosition(newLocation.translationVector());
 	}
 	
 	
 	
-	public void worldObjectWillMove(WorldObject o, Vector3f newPosition) {
+	public void worldObjectWillMove(WorldObject o, Vector3d newPosition) {
 		
 	}
 
@@ -84,7 +97,7 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 		updatePosition();
 	}
 	
-	public void worldObjectWillRotate(WorldObject o, Vector3f newOrientation) {
+	public void worldObjectWillRotate(WorldObject o, Vector3d newOrientation) {
 		
 	}
 	

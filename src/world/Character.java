@@ -1,14 +1,15 @@
 package world;
-import misc.MathF;
-import vecmath.Vector3f;
+import vecmath.Vector3d;
 
 
 public class Character extends VisibleObject implements WorldUpdateObserver {
 	
-	private volatile float xSpeed;
-	private volatile float zSpeed;
-	private volatile float speed;
-	private volatile float direction;
+	private static final double PI_OVER_2 = Math.PI / 2;
+	
+	private volatile double xSpeed;
+	private volatile double zSpeed;
+	private volatile double speed;
+	private volatile double direction;
 	private volatile World world;
 		
 	public Character(String modelName, World world) {
@@ -29,64 +30,64 @@ public class Character extends VisibleObject implements WorldUpdateObserver {
 		world.addObserver(this);
 	}
 	
-	public float getXSpeed() {
+	public double getXSpeed() {
 		return xSpeed;
 	}
 	
-	public float getZSpeed() {
+	public double getZSpeed() {
 		return zSpeed;
 	}
 	
-	public void setXSpeed(float speed) {
+	public void setXSpeed(double speed) {
 		xSpeed = speed;
 		recalculateVector();
 	}
 	
-	public void setZSpeed(float speed) {
+	public void setZSpeed(double speed) {
 		zSpeed = speed;
 		recalculateVector();
 	}
 	
-	public void accelerateX(float magnitude) {
+	public void accelerateX(double magnitude) {
 		xSpeed += magnitude;
 		recalculateVector();
 	}
 	
-	public void accelerateZ(float magnitude) {
+	public void accelerateZ(double magnitude) {
 		zSpeed += magnitude;
 		recalculateVector();
 	}
 	
 	private void recalculateVector() {
-		direction = MathF.atan2(zSpeed, xSpeed) - MathF.PI_OVER_2;
-		speed = MathF.sqrt(xSpeed * xSpeed + zSpeed * zSpeed);
+		direction = Math.atan2(zSpeed, xSpeed) - PI_OVER_2;
+		speed = Math.sqrt(xSpeed * xSpeed + zSpeed * zSpeed);
 	}
 	
 	private void recalculateComponents() {
-		xSpeed = speed * MathF.cos(direction + MathF.PI_OVER_2);
-		zSpeed = speed * MathF.sin(direction + MathF.PI_OVER_2);
+		xSpeed = speed * Math.cos(direction + PI_OVER_2);
+		zSpeed = speed * Math.sin(direction + PI_OVER_2);
 	}
 	
-	public void accelerate(float magnitude) {
+	public void accelerate(double magnitude) {
 		speed += magnitude;
 		recalculateComponents();
 	}
 	
-	public void setDirection(float radians) {
+	public void setDirection(double radians) {
 		direction = radians;
 		recalculateComponents();
 	}
 	
-	public float getDirection() {
+	public double getDirection() {
 		return direction;
 	}
 	
-	public void setSpeed(float speed) {
+	public void setSpeed(double speed) {
 		this.speed = speed;
 		recalculateComponents();
 	}
 	
-	public float getSpeed() {
+	public double getSpeed() {
 		return speed;
 	}
 	
@@ -98,8 +99,8 @@ public class Character extends VisibleObject implements WorldUpdateObserver {
 		this.world = world;
 	}
 	
-	public void worldUpdated(World w, float timeElapsed) {
-		move(new Vector3f(timeElapsed * xSpeed, 0, timeElapsed * zSpeed));
+	public void worldUpdated(World w, double timeElapsed) {
+		move(new Vector3d(timeElapsed * xSpeed, 0, timeElapsed * zSpeed));
 	}
 
 	public void worldStarted(World w) {

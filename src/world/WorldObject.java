@@ -1,26 +1,26 @@
 package world;
 
-import vecmath.Vector3f;
-import vecmath.Matrix4f;
+import vecmath.Vector3d;
+import vecmath.Matrix4d;
 import vecmath.Vector3i;
 
 import java.util.LinkedHashSet;
 
 public class WorldObject {
 	
-	protected Vector3f position;
-	protected Vector3f orientation;
+	protected Vector3d position;
+	protected Vector3d orientation;
 	
 	private LinkedHashSet<WorldObjectMovementObserver> observers = new LinkedHashSet<WorldObjectMovementObserver>();
 	
 	public WorldObject() {
-		position = new Vector3f();
-		orientation = new Vector3f();
+		position = new Vector3d();
+		orientation = new Vector3d();
 	}
 	
-	public void move(Vector3f distance) {
+	public void move(Vector3d distance) {
 		
-		Vector3f newPosition = new Vector3f(distance);
+		Vector3d newPosition = new Vector3d(distance);
 		
 		synchronized (position) {
 			newPosition.add(position);
@@ -29,17 +29,17 @@ public class WorldObject {
 		setPosition(newPosition);
 	}
 	
-	public Vector3f getPosition() {
-		Vector3f ret = new Vector3f();
+	public Vector3d getPosition() {
+		Vector3d ret = new Vector3d();
 		synchronized (position) {
 			ret.set(position);
 		}
 		return ret;
 	}
 	
-	public void setPosition(Vector3f position) {
+	public void setPosition(Vector3d position) {
 		
-		Vector3f tmp = new Vector3f(position);
+		Vector3d tmp = new Vector3d(position);
 		notifyObserversWillMove(tmp);
 		
 		synchronized (this.position) {
@@ -51,7 +51,7 @@ public class WorldObject {
 	
 	public void setPosition(Vector3i position) {
 		
-		Vector3f tmp = new Vector3f(position);
+		Vector3d tmp = new Vector3d(position);
 		notifyObserversWillMove(tmp);
 		
 		synchronized (this.position) {
@@ -61,9 +61,9 @@ public class WorldObject {
 		notifyObserversDidMove();
 	}
 	
-	public void rotate(Vector3f rotation) {
+	public void rotate(Vector3d rotation) {
 
-		Vector3f newOrientation = new Vector3f(rotation);
+		Vector3d newOrientation = new Vector3d(rotation);
 		
 		synchronized (orientation) {
 			newOrientation.add(orientation);
@@ -72,17 +72,17 @@ public class WorldObject {
 		setOrientation(newOrientation);
 	}
 	
-	public Vector3f getOrientation() {
-		Vector3f ret = new Vector3f();
+	public Vector3d getOrientation() {
+		Vector3d ret = new Vector3d();
 		synchronized (orientation) {
 			ret.set(orientation);
 		}
 		return ret;
 	}
 	
-	public void setOrientation(Vector3f orientation) {
+	public void setOrientation(Vector3d orientation) {
 		
-		Vector3f tmp = new Vector3f(orientation);
+		Vector3d tmp = new Vector3d(orientation);
 		notifyObserversWillRotate(tmp);
 		
 		synchronized (this.orientation) {
@@ -104,7 +104,7 @@ public class WorldObject {
 		}
 	}
 	
-	private void notifyObserversWillMove(Vector3f newPosition) {
+	private void notifyObserversWillMove(Vector3d newPosition) {
 		
 		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
 		synchronized (observers) {
@@ -128,7 +128,7 @@ public class WorldObject {
 		}
 	}
 	
-	private void notifyObserversWillRotate(Vector3f newOrientation) {
+	private void notifyObserversWillRotate(Vector3d newOrientation) {
 		
 		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
 		synchronized (observers) {
@@ -152,17 +152,17 @@ public class WorldObject {
 		}
 	}
 	
-	public Matrix4f getTransformationMatrix() {
+	public Matrix4d getTransformationMatrix() {
 		
-		Matrix4f transformation = new Matrix4f();
+		Matrix4d transformation = new Matrix4d();
 		
 		synchronized (position) {
 			transformation.set(position);
 		}
 		
-		float ox;
-		float oy;
-		float oz;
+		double ox;
+		double oy;
+		double oz;
 		
 		synchronized (orientation) {
 			ox = orientation.x;
