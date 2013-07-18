@@ -10,12 +10,10 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.util.glu.GLU;
 
 import vecmath.Matrix3f;
 import vecmath.Matrix4d;
 import vecmath.Matrix4f;
-import world.Drawable.idType;
 
 
 public class RiggedObject extends WorldObject implements Drawable {	

@@ -80,7 +80,7 @@ public class Animation {
 	}
 	
 	
-	private volatile double startTime = Timer.getTime();
+	private volatile double startTime = World.getMainWorldSimulationTime();
 	private volatile boolean running = false;
 	private volatile double stopTime;
 	private float frameLength;
@@ -112,8 +112,8 @@ public class Animation {
 	
 	public double getTime() {
 		if (running) {
-			setTime(Timer.getTime() - startTime);
-			return Timer.getTime() - startTime;
+			setTime(World.getMainWorldSimulationTime() - startTime);
+			return World.getMainWorldSimulationTime() - startTime;
 		}
 		else {
 			return stopTime;
@@ -123,7 +123,7 @@ public class Animation {
 	public void setTime(double time) {
 		double length = frameLength * getFrameCount();
 		time = time % length;
-		startTime = Timer.getTime() - time;
+		startTime = World.getMainWorldSimulationTime() - time;
 		stopTime = time;
 	}
 	

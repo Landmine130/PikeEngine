@@ -22,9 +22,9 @@ public class VisibleObject extends WorldObject implements Drawable {
 	private volatile float opacity;
 	
 	public VisibleObject(String modelName) {
-		this.shader = Shader.shader;
-		Model model = Model.getModel(modelName, true);
-		this.model = model;
+		loadShader(modelName);
+		loadModel(modelName);
+		model = Model.getModel(modelName, true);
 		opacity = 1f;
 	}
 	
@@ -39,6 +39,14 @@ public class VisibleObject extends WorldObject implements Drawable {
 		this.model = model;
 		this.shader = shader;
 		opacity = 1f;
+	}
+	
+	protected void loadShader(String name) {
+		shader = Shader.shader;
+	}
+	
+	protected void loadModel(String name) {
+		model = Model.getModel(name, true);
 	}
 	
 	public Shader getShader() {

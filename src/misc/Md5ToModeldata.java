@@ -19,6 +19,7 @@ import org.lwjgl.BufferUtils;
 import vecmath.Matrix4f;
 import vecmath.Quat4f;
 import vecmath.Vector2f;
+import vecmath.Vector3d;
 import vecmath.Vector3f;
 import world.Animation;
 import world.RiggedModel;

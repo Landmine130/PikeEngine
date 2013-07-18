@@ -3,12 +3,10 @@ package world;
 import misc.Timer;
 import misc.Benchmark;
 import misc.InputHandler;
-import misc.MathF;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Keyboard;
@@ -17,19 +15,10 @@ import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
-import org.lwjgl.util.glu.GLU;
-
-import vecmath.Matrix3f;
-import vecmath.Matrix4f;
-import vecmath.Vector3f;
-import world.terrain.Terrain;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL32.*;
+
 
 public class World {
 		
@@ -45,7 +34,7 @@ public class World {
 	private volatile boolean isRunning;
 	private volatile boolean isPaused;
 	
-	private int targetFPS = 60;
+	private volatile int targetFPS = 60;
 	
 	private SoundManager soundManager;
 	
@@ -53,10 +42,10 @@ public class World {
 	private int depthBufferPrecision = 24;
 	private int stencilBufferPrecision = 0;
 	
-	private double timeSinceLastUpdate;
+	private double startTime;
+	private double simulationTime;
 	
 	private volatile Drawable skybox;
-	private volatile Terrain terrain;
 	private volatile ViewPoint viewPoint;
 
 	private volatile double fps;
@@ -70,15 +59,28 @@ public class World {
 	LinkedHashSet<Drawable> tempDrawableObjects = new LinkedHashSet<Drawable>();
 	LinkedHashSet<WorldUpdateObserver> tempObservers = new LinkedHashSet<WorldUpdateObserver>();
 
-	public World(long seed) {
+	private boolean started = false;
+	
+	private static World mainWorld;
+
+	public static double getMainWorldLiveSimulationTime() {
+		return mainWorld.getLiveSimulationTime();
+	}
+	
+	public static double getMainWorldSimulationTime() {
+		return mainWorld.getSimulationTime();
+	}
+	
+	public World() {
 		
+		mainWorld = this;
 		soundManager = new SoundManager();
 		soundManager.initialize(8);
 		
 		isPaused = false;
 		
 		try {
-			Display.setTitle("Robots");
+			Display.setTitle("Space");
 			Display.setDisplayMode(new DisplayMode(INITIAL_WIDTH, INITIAL_HEIGHT));
 			PixelFormat pixelFormat = new PixelFormat(alphaBufferPrecision, depthBufferPrecision, stencilBufferPrecision);
 			ContextAttribs contextAtrributes = new ContextAttribs(GL_MAJOR_VERSION, GL_MINOR_VERSION).withProfileCore(true).withForwardCompatible(true);			 
@@ -122,9 +124,11 @@ public class World {
 		glActiveTexture(GL_TEXTURE0);
 
 	    
-		terrain = new Terrain(seed);
 	}
 	
+	public ViewPoint getViewPoint() {
+		return viewPoint;
+	}
 	
 	public Drawable getSkybox() {
 		return skybox;
@@ -158,6 +162,14 @@ public class World {
 		}
 	}
 	
+	public int getTargetFPS() {
+		return targetFPS;
+	}
+	
+	public void setTargetFPS(int fps) {
+		targetFPS = fps;
+	}
+	
 	/**
    * Sets the display mode for fullscreen mode
 	 */
@@ -182,6 +194,19 @@ public class World {
 	}
 	*/
 	
+	public double getSimulationTime() {
+		return simulationTime;
+	}
+	
+	public double getLiveSimulationTime() {
+		if (isPaused) {
+			return simulationTime;
+		}
+		else {
+			return Timer.getTime() - startTime;
+		}
+	}
+	
 	public void setPaused(boolean isPaused) {
 		
 		this.isPaused = isPaused;
@@ -194,78 +219,70 @@ public class World {
 		return isPaused;
 	}
 	
-	public ViewPoint getViewPoint() {
-		return viewPoint;
+	public void start() {
+		
+		boolean shouldStart;
+		synchronized (this) {
+			shouldStart = !started;
+			started = true;
+		}
+		
+		if (shouldStart) {
+			setPaused(false);
+			notifyObserversOfStart();
+			double fpsTime = Timer.getTime();
+			boolean wasPaused = isPaused();
+			simulationTime = 0;
+			startTime = Timer.getTime();
+			while (isRunning) {
+				if(Display.wasResized()) {
+					glViewport(0, 0, Display.getWidth(), Display.getHeight());
+					viewPoint.updatePerspectiveMatrix();
+				}
+				if (!isPaused) {
+					if (wasPaused) {
+						notifyObserversOfResume();
+						wasPaused = false;
+						startTime = Timer.getTime() - simulationTime;
+					}
+					double newSimulationTime = Timer.getTime() - startTime;
+					double deltaTime = newSimulationTime - simulationTime;
+					simulationTime = newSimulationTime;
+					notifyObserversOfUpdate(deltaTime);
+				}
+				else if (!wasPaused) {
+					notifyObserversOfPause();
+					wasPaused = true;
+				}
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				if (skybox != null) {
+					glDepthRange(0f, .99f);
+					drawFrame();
+					glDepthRange(.99f, 1f);
+					drawSkybox();
+				}
+				else {
+					drawFrame();
+				}
+				Display.update();
+				Display.sync(targetFPS);
+				double currentTime = Timer.getTime();
+				fps = (1 / (currentTime - fpsTime) + fps) / 2;
+				fpsTime = currentTime;
+				InputHandler.checkInput();
+				if (Display.isCloseRequested()) {
+					terminate();
+				}
+			}
+			notifyObserversOfClose();
+			tearDownGL();
+		}
 	}
 	
-	public void stop() {
-		
+	public void terminate() {
 		isRunning = false;
 	}
-	
-	private void tearDownGL() {
-		processorCheckTimer.stop();
-		synchronized (updaters) {
-			for (int i = 0; i < updaters.length; i++) {
-				updaters[i].stop();
-			}
-		}
-		synchronized (drawPreparers) {
-			for (int i = 0; i < drawPreparers.length; i++) {
-				drawPreparers[i].stop();
-			}
-		}
-		soundManager.destroy();
-		Display.destroy();
-	}
-	
-	public void start() {
-		setPaused(false);
-		notifyObserversOfStart();
-		double fpsTime = Timer.getTime();
-		boolean wasPaused = isPaused();
-		timeSinceLastUpdate = Timer.getTime();
-		while (isRunning) {
-			if(Display.wasResized()) {
-				glViewport(0, 0, Display.getWidth(), Display.getHeight());
-				viewPoint.updatePerspectiveMatrix();
-			}
-			if (!isPaused) {
-				if (wasPaused) {
-					notifyObserversOfResume();
-					wasPaused = false;
-				}
-				notifyObserversOfUpdate();
-				timeSinceLastUpdate = Timer.getTime();
-			}
-			else if (!wasPaused) {
-				notifyObserversOfPause();
-				wasPaused = true;
-			}
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			if (skybox != null) {
-				glDepthRange(0f, .99f);
-				drawFrame();
-				glDepthRange(.99f, 1f);
-				drawSkybox();
-			}
-			else {
-				drawFrame();
-			}
-			Display.update();
-			Display.sync(targetFPS);
-			double currentTime = Timer.getTime();
-			fps = (1 / (currentTime - fpsTime) + fps) / 2;
-			fpsTime = currentTime;
-			InputHandler.checkInput();
-			if (Display.isCloseRequested()) {
-				stop();
-			}
-		}
-		notifyObserversOfClose();
-		tearDownGL();
-	}
-	
+		
 	private void drawSkybox() {
 		skybox.prepareToDrawInWorld(this);
 		if (skybox.needsDrawn()) {
@@ -387,7 +404,7 @@ public class World {
 		}
 	}
 	
-	private void notifyObserversOfUpdate() {
+	private void notifyObserversOfUpdate(double deltaTime) {
 		
 		synchronized (observers) {
 			tempObservers.addAll(observers);
@@ -397,12 +414,10 @@ public class World {
 		synchronized (updaters) {
 			
 			int objectsPerUpdater = tempObservers.size() / updaters.length + 1;
-
-			double timeElapsed = Timer.getTime() - timeSinceLastUpdate;
 			
 			for (int i = 0; i < updaters.length; i++) {
 				
-				updaters[i].setTime(timeElapsed);
+				updaters[i].setDeltaTime(deltaTime);
 				
 				for (int j = 0; j < objectsPerUpdater && iterator.hasNext(); j++) {
 
@@ -494,12 +509,22 @@ public class World {
 		this.viewPoint = viewPoint;
 	}
 	
-	public Terrain getTerrain() {
-		return terrain;
+	private void tearDownGL() {
+		processorCheckTimer.stop();
+		synchronized (updaters) {
+			for (int i = 0; i < updaters.length; i++) {
+				updaters[i].stop();
+			}
+		}
+		synchronized (drawPreparers) {
+			for (int i = 0; i < drawPreparers.length; i++) {
+				drawPreparers[i].stop();
+			}
+		}
+		soundManager.destroy();
+		Display.destroy();
 	}
 }
-
-
 
 
 class BackgroundUpdater implements Runnable {
@@ -508,7 +533,7 @@ class BackgroundUpdater implements Runnable {
 	
 	private final Thread thread = new Thread(this);
 	private World world;
-	private volatile double time = 0;
+	private volatile double deltaTime = 0;
 	private boolean paused = false;
 	private boolean running = true;
 	
@@ -525,8 +550,8 @@ class BackgroundUpdater implements Runnable {
 		}
 	}
 	
-	public void setTime(double time) {
-		this.time = time;
+	public void setDeltaTime(double deltaTime) {
+		this.deltaTime = deltaTime;
 	}
 	
 	private LinkedList<WorldUpdateObserver> list = new LinkedList<WorldUpdateObserver>();
@@ -570,7 +595,7 @@ class BackgroundUpdater implements Runnable {
 						
 					}
 				}
-				list.removeFirst().worldUpdated(world, time);
+				list.removeFirst().worldUpdated(world, deltaTime);
 			}
 			
 			if (!running) {

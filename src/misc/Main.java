@@ -8,6 +8,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
 import vecmath.Vector3d;
+import vecmath.Vector4d;
 import vecmath.Vector3i;
 
 public class Main implements InputObserver {
@@ -17,6 +18,8 @@ public class Main implements InputObserver {
 	private static VisibleObject p;
 	private static Timer t;
 	
+	private static PhysicsObject physicsObject;
+	
 	public static void main(String[] args) {
 		
 		System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Robots");
@@ -24,7 +27,7 @@ public class Main implements InputObserver {
 		
 		Display.setResizable(true);
 		
-		world = new World(System.nanoTime());
+		world = new World();
 		world.setSkybox(new Skybox());
 /*		terrain.get(new Vector3i(0,0,0));
 		terrain.get(new Vector3i(0,0,-1));
@@ -40,20 +43,25 @@ public class Main implements InputObserver {
 			return;
 		}
 		
-		RiggedObject riggedObject = new RiggedObject("boblampclean");
-		riggedObject.setPosition(new Vector3d(0,0.5,10));
+		/*RiggedObject riggedObject = new RiggedObject("boblampclean");
+		riggedObject.setPosition(new Vector3d(0,0.5,80));
 		riggedObject.getAnimation().start();
-		world.addDrawable(riggedObject);
-		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint(), world);
-		player.setPosition(new Vector3d(0,20.5,0));
+		world.addDrawable(riggedObject);*/
 		
+		physicsObject = new PhysicsObject("banana");
+		world.addDrawable(physicsObject);
+		world.addObserver(physicsObject);
+		
+		
+		
+		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint(), world);
+		player.setPosition(new Vector3d(0,0,-5));
 		//o = new VisibleObject("cube");
 		//o.setPosition(new Vector3f(1f,0,30f));
 		//world.setViewPoint(new TargetedViewPoint(o, 10));
 		//p = new VisibleObject("cube");
 		//p.setPosition(new Vector3f(.5f,10f,-50));
 		Main mainObject = new Main();
-		t = new Timer(1, -1, mainObject, "printFPS");
 		InputHandler.addObserver(mainObject);
 		//world.addObject(o);
 		//world.addObject(p);
@@ -76,25 +84,30 @@ public class Main implements InputObserver {
 	}
 	
 	public void keyDown(int key) {
-		if (key == Keyboard.KEY_ESCAPE) {
-			world.setPaused(!world.isPaused());
-		}
-		else if (key == Keyboard.KEY_P) {
-			try {
-				Display.setFullscreen(true);
-			}
-			catch (LWJGLException e) {
-				System.err.println("Error: Failed to enter fullscreen");
-			}
-		}
-		else if (key == Keyboard.KEY_F) {
-			if (t.isRunning()) {
-				t.stop();
-			}
-			else {
-				printFPS(t);
-				t.start();
-			}
+		switch (key) {
+			case Keyboard.KEY_ESCAPE:
+				world.setPaused(!world.isPaused());
+			break;
+			case Keyboard.KEY_P:
+				try {
+					Display.setFullscreen(true);
+				}
+				catch (LWJGLException e) {
+					System.err.println("Error: Failed to enter fullscreen");
+				}
+				Force force = new Force(new Vector4d(0,10,0,.1), new Vector3d(.1,0,.1));
+				physicsObject.addForce(force);
+			break;
+			case Keyboard.KEY_F:
+				if (t == null || !t.isRunning()) {
+					t = new Timer(1, -1, this, "printFPS");
+					printFPS(t);
+					t.start();
+				}
+				else {
+					t.stop();
+				}
+				break;
 		}
 		/*
 		else if (key == Keyboard.KEY_1) {

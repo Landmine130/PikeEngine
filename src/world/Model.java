@@ -22,7 +22,6 @@ public class Model {
     private static HashMap<String, Model> loadedModels = new HashMap<String, Model>();
 	
 	public static final String MODELDATA_PATH = "Resources/Models/";
-	public static final String MODELDATA_PATH_EXTENSION = ".modeldata";
 	protected ByteBuffer data;
 
 	protected int vertexCount;
@@ -41,9 +40,7 @@ public class Model {
 			m = new Model(name, textured);
 			loadedModels.put(name, m);
 		}
-		else {
-			m = new Model(m);
-		}
+		m = new Model(m);
 		return m;
 	}
 	
@@ -52,7 +49,7 @@ public class Model {
 		loadedModels.remove(name);
 	}
 	
-	protected static String getExtension() {
+	protected String getExtension() {
 		return ".modeldata";
 	}
 	
@@ -145,8 +142,8 @@ public class Model {
 		this.texture = texture;
 	}
 	
-	private static final int FLOAT_BYTE_COUNT = Float.SIZE / Byte.SIZE;
-	private static final int HEADER_SIZE = 3 * FLOAT_BYTE_COUNT;
+	protected static final int FLOAT_BYTE_COUNT = Float.SIZE / Byte.SIZE;
+	protected static final int HEADER_SIZE = 3 * FLOAT_BYTE_COUNT;
 	
 	protected void loadModelDataForName(String name) throws FileNotFoundException, IOException {
 		File file = new File(name);

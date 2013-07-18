@@ -17,7 +17,7 @@ public class ViewPoint extends WorldObject {
 	
 	public ViewPoint() {
 		nearViewDistance = .1f;
-		farViewDistance = 100.0f;
+		farViewDistance = 10000.0f;
 		fieldOfView = MathF.toRadians(65f);
 		updatePerspectiveMatrix();
 	}
