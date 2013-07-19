@@ -97,6 +97,32 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 		}
 	}
 	
+	public void accelerate(Vector3d acceleration) {
+		synchronized (velocity) {
+			velocity.add(acceleration);
+		}
+	}
+	
+	public Vector3d getAngularVelocity() {
+		Vector3d ret = new Vector3d();
+		synchronized (angularVelocity) {
+			ret.set(angularVelocity);
+		}
+		return ret;
+	}
+	
+	public void setAngularVelociy(Vector3d angularVelocity) {
+		synchronized (this.angularVelocity) {
+			this.angularVelocity.set(angularVelocity);
+		}
+	}
+	
+	public void angularlyAccelerate(Vector3d acceleration) {
+		synchronized (angularVelocity) {
+			angularVelocity.add(acceleration);
+		}
+	}
+	
 	public Vector3d getAcceleration() {
 		Vector3d ret = new Vector3d();
 		synchronized (acceleration) {
@@ -313,7 +339,7 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 			lastUpdateTime = currentTime;
 		}
 		move(scaledVector);
-		rotate(angularVelocity);
+		rotate(angularVelocity);		
 	}
 
 	@Override
