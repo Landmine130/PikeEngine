@@ -196,13 +196,13 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 		synchronized (this) {
 			double liveSimulationTime = World.getMainWorldLiveSimulationTime();
 			
-			Vector3d initialForce = force.forceForTime(0);
+			Vector3d initialForce = force.forceForTime(0, this);
 			double scale = (liveSimulationTime - lastUpdateTime) * massReciprical;
 			
 			scaledForce.scale(scale, initialForce);
 			accelerationPartUpdate.sub(scaledForce);
 			
-			scaledForce.cross(initialForce, force.offsetForTime(0));
+			scaledForce.cross(initialForce, force.offsetForTime(0, this));
 			scaledForce.scale(scale);
 			angularAccelerationPartUpdate.sub(scaledForce);
 			
@@ -249,12 +249,12 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 			double liveSimulationTime = World.getMainWorldLiveSimulationTime();
 			double scale = (liveSimulationTime - lastUpdateTime) * massReciprical;
 			double forceTime = liveSimulationTime - dynamicForceStartTimes.get(force);
-			Vector3d currentForce = force.forceForTime(forceTime);
+			Vector3d currentForce = force.forceForTime(forceTime, this);
 			
 			scaledForce.scale(scale, currentForce);
 			accelerationPartUpdate.add(scaledForce);
 			
-			scaledForce.cross(currentForce, force.offsetForTime(forceTime));
+			scaledForce.cross(currentForce, force.offsetForTime(forceTime, this));
 			scaledForce.scale(scale);
 			angularAccelerationPartUpdate.add(scaledForce);
 				
@@ -275,12 +275,12 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 		for (DynamicForce force : dynamicForces) {
 			double time = currentTime - dynamicForceStartTimes.get(force);
 			
-			Vector3d currentForce = force.forceForTime(time);
+			Vector3d currentForce = force.forceForTime(time, this);
 			
 			scaledVector.scale(deltaTime, currentForce);
 			totalScaledVector.add(scaledVector);
 			
-			angularScaledVector.cross(currentForce, force.offsetForTime(time));
+			angularScaledVector.cross(currentForce, force.offsetForTime(time, this));
 			angularScaledVector.scale(deltaTime);
 			totalAngularScaledVector.add(angularScaledVector);
 		}
