@@ -4,6 +4,7 @@ import org.lwjgl.opengl.Display;
 import misc.MathF;
 import vecmath.Matrix4d;
 import vecmath.Matrix4f;
+import vecmath.Quat4d;
 import vecmath.Vector3d;
 import vecmath.Vector3f;
 
@@ -63,20 +64,12 @@ public class ViewPoint extends WorldObject {
 	public Matrix4d getTransformationMatrix() {
 		
 		Matrix4d transformation = new Matrix4d();
-		
-		double ox;
-		double oy;
-		double oz;
+		Quat4d invertedOrientation = new Quat4d(orientation);
+		invertedOrientation.conjugate();
 		
 		synchronized (orientation) {
-			ox = orientation.x;
-			oy = orientation.y;
-			oz = orientation.z;
+			transformation.set(invertedOrientation);
 		}
-		
-		transformation.rotX(-ox);
-		transformation.rotY(-oy);
-		transformation.rotZ(-oz);
 		
 		Vector3d negativePosition = new Vector3d();
 		

@@ -1,5 +1,6 @@
 package world;
 
+import vecmath.Quat4d;
 import vecmath.Vector3d;
 import vecmath.Matrix4d;
 import vecmath.Vector3i;
@@ -9,13 +10,13 @@ import java.util.LinkedHashSet;
 public class WorldObject {
 	
 	protected Vector3d position;
-	protected Vector3d orientation;
+	protected Quat4d orientation;
 	
 	private LinkedHashSet<WorldObjectMovementObserver> observers = new LinkedHashSet<WorldObjectMovementObserver>();
 	
 	public WorldObject() {
 		position = new Vector3d();
-		orientation = new Vector3d();
+		orientation = new Quat4d();
 	}
 	
 	public void move(Vector3d distance) {
@@ -61,18 +62,50 @@ public class WorldObject {
 		notifyObserversDidMove();
 	}
 	
-	public void rotate(Vector3d rotation) {
+	public void rotate(Quat4d rotation) {
 
-		Vector3d newOrientation = new Vector3d(rotation);
+		Quat4d newOrientation = new Quat4d(rotation);
 		
 		synchronized (orientation) {
-			newOrientation.add(orientation);
+			newOrientation.mul(orientation);
 		}
 		
 		setOrientation(newOrientation);
 	}
 	
-	public Vector3d getOrientation() {
+	public void rotateExtrinsic(Vector3d rotation) {
+
+		Quat4d newOrientation = new Quat4d();
+		newOrientation.set(rotation);
+		
+		synchronized (orientation) {
+			newOrientation.mul(orientation);
+		}
+		
+		setOrientation(newOrientation);
+	}
+	
+	public void rotateIntrinsic(Vector3d rotation) {
+
+		Quat4d newOrientation = new Quat4d();
+		newOrientation.set(rotation);
+		
+		synchronized (orientation) {
+			newOrientation.mul(orientation, newOrientation);
+		}
+		
+		setOrientation(newOrientation);
+	}
+	
+	public Quat4d getOrientation() {
+		Quat4d ret = new Quat4d();
+		synchronized (orientation) {
+			ret.set(orientation);
+		}
+		return ret;
+	}
+	
+	public Vector3d getEulerOrientation() {
 		Vector3d ret = new Vector3d();
 		synchronized (orientation) {
 			ret.set(orientation);
@@ -80,9 +113,22 @@ public class WorldObject {
 		return ret;
 	}
 	
+	public void setOrientation(Quat4d orientation) {
+		
+		Quat4d tmp = new Quat4d(orientation);
+		notifyObserversWillRotate(tmp);
+		
+		synchronized (this.orientation) {
+			this.orientation.set(tmp);
+		}
+		
+		notifyObserversDidRotate();
+	}
+	
 	public void setOrientation(Vector3d orientation) {
 		
-		Vector3d tmp = new Vector3d(orientation);
+		Quat4d tmp = new Quat4d();
+		tmp.set(orientation);
 		notifyObserversWillRotate(tmp);
 		
 		synchronized (this.orientation) {
@@ -128,7 +174,7 @@ public class WorldObject {
 		}
 	}
 	
-	private void notifyObserversWillRotate(Vector3d newOrientation) {
+	private void notifyObserversWillRotate(Quat4d newOrientation) {
 		
 		LinkedHashSet<WorldObjectMovementObserver> temp = new LinkedHashSet<WorldObjectMovementObserver>();
 		synchronized (observers) {
@@ -160,19 +206,9 @@ public class WorldObject {
 			transformation.set(position);
 		}
 		
-		double ox;
-		double oy;
-		double oz;
-		
 		synchronized (orientation) {
-			ox = orientation.x;
-			oy = orientation.y;
-			oz = orientation.z;
+			transformation.setRotation(orientation);
 		}
-		
-		transformation.rotX(ox);
-		transformation.rotY(oy);
-		transformation.rotZ(oz);
 		
 		return transformation;
 	}

@@ -18,6 +18,8 @@ package vecmath;
 
 import java.io.Serializable;
 
+import misc.MathF;
+
 /**
  * A 4 element quaternion represented by single precision floating 
  * point x,y,z,w coordinates. 
@@ -111,10 +113,10 @@ public class Quat4f extends Tuple4f implements Serializable {
     }
 
     /**
-     * Constructs and initializes a Quat4f to (0,0,0,0).
+     * Constructs and initializes a Quat4f to (0,0,0,1).
      */
     public Quat4f() {
-	// super(); called implicitly.
+    	super(0,0,0,1);
     }
 
     /**
@@ -354,7 +356,31 @@ public class Quat4f extends Tuple4f implements Serializable {
 	z *= s;
 	w = (float)Math.cos(0.5*a1.angle);
     }
-
+    
+    /**
+     * Sets the value of this quaternion to the equivalent rotation of the extrinsic
+     * Vector3d Euler angle.
+     * @param v the Vector3f
+     */
+    public final void set(Vector3f v) {
+    	float vx = v.x/2;
+    	float vy = v.y/2;
+    	float vz = v.z/2;
+    	
+        float c1 = MathF.cos(vy);
+        float s1 = MathF.sin(vy);
+        float c2 = MathF.cos(vz);
+        float s2 = MathF.sin(vz);
+        float c3 = MathF.cos(vx);
+        float s3 = MathF.sin(vx);
+        float c1c2 = c1*c2;
+        float s1s2 = s1*s2;
+        w =c1c2*c3 - s1s2*s3;
+      	x =c1c2*s3 + s1s2*c3;
+    	y =s1*c2*c3 + c1*s2*s3;
+    	z =c1*s2*c3 - s1*c2*s3;
+    }
+    
     /**
       * Performs a great circle interpolation between this quaternion and the
       * quaternion parameter and places the result into this quaternion.

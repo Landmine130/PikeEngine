@@ -18,6 +18,8 @@ package vecmath;
 
 import java.io.Serializable;
 
+import misc.MathF;
+
 /**
   * A 3 element vector that is represented by single precision floating point
   * x,y,z coordinates. If this value represents a normal, then it should be
@@ -68,6 +70,7 @@ public class Vector3f extends Tuple3f implements Serializable {
 	public static final Vector3f X_UNIT_VECTOR = new Vector3f(1,0,0);
 	public static final Vector3f Y_UNIT_VECTOR = new Vector3f(0,1,0);
 	public static final Vector3f Z_UNIT_VECTOR = new Vector3f(0,0,1);
+	public static final Vector3f ZERO_VECTOR = new Vector3f(0,0,0);
 
     /**
       * Constructs and initializes a Vector3f from the specified xyz coordinates.
@@ -128,6 +131,32 @@ public class Vector3f extends Tuple3f implements Serializable {
       */
     public Vector3f() {
 	super();
+    }
+        
+    /**
+     * Sets the value of this vector to the Euler angle representation of the quaternion argument.
+     * @param q1 the quaternion
+     */
+    public void set(Quat4f q1) {
+    	float test = q1.x*q1.y + q1.z*q1.w;
+    	if (test > 0.499) { // singularity at north pole
+    		y = 2 * MathF.atan2(q1.x,q1.w);
+    		z = MathF.PI_OVER_2;
+    		x = 0;
+    	}
+    	else if (test < -0.499) { // singularity at south pole
+    		y = -2 * MathF.atan2(q1.x,q1.w);
+    		x = - MathF.PI_OVER_2;
+    		z = 0;
+    	}
+    	else {
+    		float sqx = q1.x*q1.x;
+    		float sqy = q1.y*q1.y;
+    		float sqz = q1.z*q1.z;
+	        y = MathF.atan2(2*q1.y*q1.w-2*q1.x*q1.z , 1 - 2*sqy - 2*sqz);
+	    	x = MathF.asin(2*test);
+	    	z = MathF.atan2(2*q1.x*q1.w-2*q1.y*q1.z , 1 - 2*sqx - 2*sqz);
+    	}
     }
 
     /**

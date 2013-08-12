@@ -192,27 +192,44 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 		DelayedForce delayedForce;
 		Vector3d torque = force.getTorque();
 		
-		synchronized (this) {
-			delayedForce = new DelayedForce(force);
-			double scale = (delayedForce.startTime - lastUpdateTime) * massReciprical;
-
+		double duration = force.getDuration();
+		
+		if (duration == 0) {
 			v.scale(massReciprical, force.getVector());
-			synchronized (acceleration) {
-				acceleration.add(v);
+			Vector3d v2 = new Vector3d();
+			v2.set(torque.x / momentOfInertia.x, torque.y / momentOfInertia.y, torque.z / momentOfInertia.z);
+			synchronized (this) {
+				synchronized (velocity) {
+					velocity.add(v);
+				}
+				synchronized (angularVelocity) {
+					angularVelocity.add(v2);
+				}
 			}
-			v.scale(scale, force.getVector());
-			accelerationPartUpdate.sub(v);
-			
-			v.set(torque.x / momentOfInertia.x, torque.y / momentOfInertia.y, torque.z / momentOfInertia.z);
-			synchronized (angularAcceleration) {
-				angularAcceleration.add(v);
-			}
-			v.scale(scale, force.getTorque());
-			angularAccelerationPartUpdate.sub(v);
 		}
-		delayedForces.put(force, delayedForce);
-		forceRemovalQueue.add(delayedForce);
-		forceRemovalThread.interrupt();
+		else if (duration > 0) {
+			synchronized (this) {
+				delayedForce = new DelayedForce(force);	
+				double scale = (delayedForce.startTime - lastUpdateTime) * massReciprical;
+	
+				v.scale(massReciprical, force.getVector());
+				synchronized (acceleration) {
+					acceleration.add(v);
+				}
+				v.scale(scale, force.getVector());
+				accelerationPartUpdate.sub(v);
+				
+				v.set(torque.x / momentOfInertia.x, torque.y / momentOfInertia.y, torque.z / momentOfInertia.z);
+				synchronized (angularAcceleration) {
+					angularAcceleration.add(v);
+				}
+				v.scale(scale, force.getTorque());
+				angularAccelerationPartUpdate.sub(v);
+			}
+			delayedForces.put(force, delayedForce);
+			forceRemovalQueue.add(delayedForce);
+			forceRemovalThread.interrupt();
+		}
 	}
 	
 	public void addForce(DynamicForce force) {
@@ -339,7 +356,7 @@ public class PhysicsObject extends VisibleObject implements WorldUpdateObserver,
 			lastUpdateTime = currentTime;
 		}
 		move(scaledVector);
-		rotate(angularVelocity);		
+		rotateExtrinsic(angularVelocity);		
 	}
 
 	@Override

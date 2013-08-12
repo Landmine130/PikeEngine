@@ -65,6 +65,7 @@ public class Vector3d extends Tuple3d implements Serializable {
 	public static final Vector3d X_UNIT_VECTOR = new Vector3d(1,0,0);
 	public static final Vector3d Y_UNIT_VECTOR = new Vector3d(0,1,0);
 	public static final Vector3d Z_UNIT_VECTOR = new Vector3d(0,0,1);
+	public static final Vector3d ZERO_VECTOR = new Vector3d(0,0,0);
 
 
 	/**
@@ -126,6 +127,34 @@ public class Vector3d extends Tuple3d implements Serializable {
       */
     public Vector3d() {
 	super();
+    }
+    
+    private static double PI_OVER_2 = Math.PI/2;
+    
+    /**
+     * Sets the value of this vector to the Euler angle representation of the quaternion argument.
+     * @param q1 the quaternion
+     */
+    public void set(Quat4d q1) {
+    	double test = q1.x*q1.y + q1.z*q1.w;
+    	if (test > 0.499) { // singularity at north pole
+    		y = 2 * Math.atan2(q1.x,q1.w);
+    		z = PI_OVER_2;
+    		x = 0;
+    	}
+    	else if (test < -0.499) { // singularity at south pole
+    		y = -2 * Math.atan2(q1.x,q1.w);
+    		x = - PI_OVER_2;
+    		z = 0;
+    	}
+    	else {
+    		double sqx = q1.x*q1.x;
+	        double sqy = q1.y*q1.y;
+	        double sqz = q1.z*q1.z;
+	        y = Math.atan2(2*q1.y*q1.w-2*q1.x*q1.z , 1 - 2*sqy - 2*sqz);
+	    	x = Math.asin(2*test);
+	    	z = Math.atan2(2*q1.x*q1.w-2*q1.y*q1.z , 1 - 2*sqx - 2*sqz);
+    	}
     }
 
     /**

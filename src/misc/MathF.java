@@ -31,5 +31,8 @@ public class MathF {
 	public static float sqrt(float f) {
 		return (float)Math.sqrt(f);
 	}
+	public static float asin(float f) {
+		return (float)Math.asin(f);
+	}
 
 }

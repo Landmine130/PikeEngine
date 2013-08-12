@@ -19,6 +19,7 @@ public class Main implements InputObserver {
 	private static Timer t;
 	
 	private static PhysicsObject physicsObject;
+	private static PlayerCharacter player;
 	
 	public static void main(String[] args) {
 		
@@ -49,13 +50,12 @@ public class Main implements InputObserver {
 		world.addDrawable(riggedObject);*/
 		
 		physicsObject = new PhysicsObject("banana");
+		physicsObject.setPosition(new Vector3d(0,1,0));
 		world.addDrawable(physicsObject);
 		world.addObserver(physicsObject);
 		
-		
-		
-		PlayerCharacter player = new PlayerCharacter("", world.getViewPoint(), world);
-		player.setPosition(new Vector3d(0,0,-5));
+		player = new PlayerCharacter("", world.getViewPoint(), world);
+		player.setPosition(new Vector3d(0,1,-2));
 		//o = new VisibleObject("cube");
 		//o.setPosition(new Vector3f(1f,0,30f));
 		//world.setViewPoint(new TargetedViewPoint(o, 10));
@@ -95,7 +95,7 @@ public class Main implements InputObserver {
 				catch (LWJGLException e) {
 					System.err.println("Error: Failed to enter fullscreen");
 				}
-				Force force = new Force(new Vector4d(0,10,0,.1), new Vector3d(.1,0,.1));
+				Force force = new Force(new Vector4d(0,10,3,.1), new Vector3d(.1,.2,0));
 				physicsObject.addForce(force);
 			break;
 			case Keyboard.KEY_F:
@@ -108,6 +108,32 @@ public class Main implements InputObserver {
 					t.stop();
 				}
 				break;
+			case Keyboard.KEY_1:
+				physicsObject.rotateExtrinsic(new Vector3d(Math.toRadians(45),0,0));
+				break;
+			case Keyboard.KEY_3:
+				physicsObject.rotateExtrinsic(new Vector3d(0,Math.toRadians(45),0));
+				break;
+			case Keyboard.KEY_5:
+				physicsObject.rotateExtrinsic(new Vector3d(0,0,Math.toRadians(45)));
+				break;
+			case Keyboard.KEY_2:
+				physicsObject.rotateExtrinsic(new Vector3d(-Math.toRadians(45),0,0));
+				break;
+			case Keyboard.KEY_4:
+				physicsObject.rotateExtrinsic(new Vector3d(0,-Math.toRadians(45),0));
+				break;
+			case Keyboard.KEY_6:
+				physicsObject.rotateExtrinsic(new Vector3d(0,0,-Math.toRadians(45)));
+				break;
+			case Keyboard.KEY_0:
+				world.removeDrawable(physicsObject);
+				world.removeObserver(physicsObject);
+				physicsObject = new PhysicsObject("banana");
+				System.out.println(player.getOrientation());
+				physicsObject.setPosition(new Vector3d(player.getPosition().x + Math.sin(player.getEulerOrientation().y),.7,player.getPosition().z + Math.cos(player.getEulerOrientation().y)));
+				world.addDrawable(physicsObject);
+				world.addObserver(physicsObject);
 		}
 		/*
 		else if (key == Keyboard.KEY_1) {

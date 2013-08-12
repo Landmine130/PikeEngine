@@ -1,5 +1,6 @@
 package world;
 import vecmath.Matrix4d;
+import vecmath.Quat4d;
 import vecmath.Vector3d;
 
 public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementObserver {
@@ -30,8 +31,14 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 		updatePosition();
 	}
 
-	public void rotate(Vector3d magnitude) {
-		super.rotate(magnitude);
+	public void rotateExtrinsic(Vector3d magnitude) {
+		super.rotateExtrinsic(magnitude);
+		
+		updatePosition();
+	}
+	
+	public void rotateIntrinsic(Vector3d magnitude) {
+		super.rotateIntrinsic(magnitude);
 		
 		updatePosition();
 	}
@@ -62,19 +69,9 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 		
 		Matrix4d newLocation = new Matrix4d();
 		
-		double ox;
-		double oy;
-		double oz;
-		
 		synchronized (orientation) {
-			ox = orientation.x;
-			oy = orientation.y;
-			oz = orientation.z;
+			newLocation.setRotation(orientation);
 		}
-		
-		newLocation.rotX(ox);
-		newLocation.rotY(oy);
-		newLocation.rotZ(oz);
 		
 		Vector3d negativeZ = new Vector3d();
 		
@@ -97,7 +94,7 @@ public class TargetedViewPoint extends ViewPoint implements WorldObjectMovementO
 		updatePosition();
 	}
 	
-	public void worldObjectWillRotate(WorldObject o, Vector3d newOrientation) {
+	public void worldObjectWillRotate(WorldObject o, Quat4d newOrientation) {
 		
 	}
 	

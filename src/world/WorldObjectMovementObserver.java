@@ -1,4 +1,5 @@
 package world;
+import vecmath.Quat4d;
 import vecmath.Vector3d;
 
 
@@ -16,7 +17,7 @@ public interface WorldObjectMovementObserver {
 	 * @param o The rotating object
 	 * @param newOrientation The orientation that the object will rotate to. Note that modifying newOrientation will affect the new orientation of o.
 	 */
-	public void worldObjectWillRotate(WorldObject o, Vector3d newOrientation);
+	public void worldObjectWillRotate(WorldObject o, Quat4d newOrientation);
 	public void worldObjectDidRotate(WorldObject o);
 	
 }

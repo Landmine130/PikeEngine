@@ -211,6 +211,7 @@ public class World {
 		
 		this.isPaused = isPaused;
 		Keyboard.enableRepeatEvents(isPaused);
+		Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
 		Mouse.setGrabbed(!isPaused);
 		Mouse.setClipMouseCoordinatesToWindow(!isPaused);
 	}

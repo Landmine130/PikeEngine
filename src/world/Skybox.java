@@ -14,6 +14,7 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 
 import misc.MathF;
+import vecmath.Matrix4d;
 import vecmath.Matrix4f;
 import vecmath.Vector3f;
 import world.Drawable.idType;
@@ -109,10 +110,10 @@ public class Skybox implements Drawable {
 		ViewPoint viewPoint = world.getViewPoint();
 		glUseProgram(shader.getProgram());
 		
-		Matrix4f viewMatrix = new Matrix4f();
-	    viewMatrix.rotX((float)-viewPoint.getOrientation().x);
-	    viewMatrix.rotY((float)-viewPoint.getOrientation().y);
-	    viewMatrix.rotZ((float)-viewPoint.getOrientation().z);
+		Matrix4d viewMatrix = viewPoint.getTransformationMatrix();
+		Matrix4f viewMatrixF = new Matrix4f();
+		viewMatrixF.set(viewMatrix);
+	   viewMatrixF.setTranslation(Vector3f.ZERO_VECTOR);
 	    
 	    Matrix4f modelViewProjectionMatrix;
 		Texture texture;
@@ -125,7 +126,7 @@ public class Skybox implements Drawable {
 		glBindBuffer(GL_ARRAY_BUFFER, model.getArrayBuffer());
 		
 
-	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrixF);
 	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
 	    
 		//if (viewPoint.isSphereInView(model.getRadius(), modelViewProjectionMatrix.translationVector())) {
@@ -146,7 +147,7 @@ public class Skybox implements Drawable {
 		
 	    model = getLeft();
 	    
-	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrixF);
 	    modelViewProjectionMatrix.rotY(MathF.PI_OVER_2);
 	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
 	    
@@ -169,7 +170,7 @@ public class Skybox implements Drawable {
 		
 	    model = getBack();
 
-	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrixF);
 	    modelViewProjectionMatrix.rotY(MathF.PI);
 	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
 	    
@@ -192,7 +193,7 @@ public class Skybox implements Drawable {
 		
 	    model = getRight();
 
-	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrixF);
 	    modelViewProjectionMatrix.rotY(-MathF.PI_OVER_2);
 	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
 	    
@@ -216,7 +217,7 @@ public class Skybox implements Drawable {
 	    model = getBottom();
 	    if (model != null) {
 
-		    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+		    modelViewProjectionMatrix = new Matrix4f(viewMatrixF);
 		    modelViewProjectionMatrix.rotX(MathF.PI_OVER_2);
 		    modelViewProjectionMatrix.translate(new Vector3f(-.5f,-.5f,.5f));
 		    
@@ -240,7 +241,7 @@ public class Skybox implements Drawable {
 			
 	    model = getTop();
 
-	    modelViewProjectionMatrix = new Matrix4f(viewMatrix);
+	    modelViewProjectionMatrix = new Matrix4f(viewMatrixF);
 	    modelViewProjectionMatrix.translate(new Vector3f(-.5f,.5f,.5f));
 	    modelViewProjectionMatrix.rotX(-MathF.PI_OVER_2);
 		

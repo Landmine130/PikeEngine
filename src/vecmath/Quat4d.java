@@ -108,10 +108,10 @@ public class Quat4d extends Tuple4d implements Serializable {
     }
 
     /**
-     * Constructs and initializes a Quat4d to (0,0,0,0).
+     * Constructs and initializes a Quat4d to (0,0,0,1).
      */
     public Quat4d() {
-	// super(); called implicitly.
+    	super(0,0,0,1);
     }
 
     /**
@@ -335,7 +335,7 @@ public class Quat4d extends Tuple4d implements Serializable {
     }
 
     /**
-     * Sets the value of this quaternion to the equivalent rotation of teh
+     * Sets the value of this quaternion to the equivalent rotation of the
      * AxisAngle argument.
      * @param a1 the axis-angle
      */
@@ -350,6 +350,31 @@ public class Quat4d extends Tuple4d implements Serializable {
 	y *= s;
 	z *= s;
 	w = Math.cos(0.5*a1.angle);
+    }
+    
+    /**
+     * Sets the value of this quaternion to the equivalent rotation of the extrinsic
+     * Vector3d Euler angle.
+     * @param v the Vector3d
+     */
+    public final void set(Vector3d v) {
+    	
+    	double vx = v.x/2;
+    	double vy = v.y/2;
+    	double vz = v.z/2;
+    	
+        double c1 = Math.cos(vy);
+        double s1 = Math.sin(vy);
+        double c2 = Math.cos(vz);
+        double s2 = Math.sin(vz);
+        double c3 = Math.cos(vx);
+        double s3 = Math.sin(vx);
+        double c1c2 = c1*c2;
+        double s1s2 = s1*s2;
+        w =c1c2*c3 - s1s2*s3;
+      	x =c1c2*s3 + s1s2*c3;
+    	y =s1*c2*c3 + c1*s2*s3;
+    	z =c1*s2*c3 - s1*c2*s3;
     }
 
     /**
